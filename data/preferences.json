@@ -1,0 +1,32 @@
+{
+  "communication_style": {
+    "tone": "Direct, analytical, no filler or flattery",
+    "approach": "Flag gaps explicitly rather than guessing or inventing data",
+    "delivery": "Don't explain what you're about to do — just do it",
+    "framing": "Be analytical before implementation: define the problem before proposing a solution",
+    "pushback": "Push back if a proposed approach doesn't match requirements"
+  },
+  "writing_standards": {
+    "grant_and_policy": [
+      "All policies must cite 245G statute language where required",
+      "Grant narratives: narrative-driven, evidence-backed, APA citations",
+      "Strict alignment: narrative ↔ work plan ↔ budget ↔ performance measures",
+      "No speculation — flag missing regulatory details rather than guessing",
+      "Cultural competence must appear structurally (governance, staffing, service design, language access) — not just stated"
+    ]
+  },
+  "coding_standards": [
+    "Analytical before implementation — define the problem before proposing the solution",
+    "Structured documentation — version-controlled, dated, consumable by non-technical stakeholders",
+    "Prompt engineering workflow: Use case → Draft → Test → Evaluate → Revise → Document",
+    "Deliverable tracking — every output tied to a sprint and deadline",
+    "All automation proposals include expected business outcome"
+  ],
+  "budget_standards": {
+    "indirect_costs": "6–10%",
+    "fringe_benefits": "~15%",
+    "cola_annual": "3%",
+    "fte_allocation": "Modeled explicitly by role (clinical vs. non-clinical split where applicable)",
+    "alignment_rule": "Every budget line justified; every narrative claim backed by budget"
+  }
+}

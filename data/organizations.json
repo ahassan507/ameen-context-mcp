@@ -1,0 +1,36 @@
+[
+  {
+    "name": "IDeaS Revenue Solutions",
+    "role": "Business Analytics Intern",
+    "team": "IDeaS.Lab",
+    "type": "Employer",
+    "domain": "Hospitality revenue management / AI solutions"
+  },
+  {
+    "name": "Rooted Wellness & Recovery LLC",
+    "role": "Principal / Owner",
+    "type": "Owned entity — Minnesota 319B",
+    "domain": "Behavioral health / SUD treatment",
+    "status": "Pre-licensure (245G pending)"
+  },
+  {
+    "name": "Uplift Treatment Center",
+    "role": "Grant strategist / advisor",
+    "location": "Coon Rapids, MN",
+    "domain": "SUD treatment",
+    "grants": ["OERAC A+C", "BHA RFP"]
+  },
+  {
+    "name": "Bridge Healing Center (BHC)",
+    "role": "Grant strategist / advisor",
+    "location": "St. Cloud, MN",
+    "domain": "SUD / MH prevention",
+    "grants": ["CEMIG", "OERAC Category A Prevention"]
+  },
+  {
+    "name": "Pathway to Recovery (PTR)",
+    "role": "Grant strategist / advisor",
+    "domain": "MAT / youth SUD",
+    "grants": ["MAT expansion"]
+  }
+]

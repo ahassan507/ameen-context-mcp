@@ -1,0 +1,27 @@
+{
+  "name": "Ameen Hassan",
+  "email": "ameenahassan421@gmail.com",
+  "location": "Minnesota",
+  "active_roles": [
+    {
+      "title": "Business Analytics Intern",
+      "org": "IDeaS Revenue Solutions",
+      "team": "IDeaS.Lab",
+      "start": "2026-02",
+      "focus": "AI-driven solutions for hospitality/revenue management"
+    },
+    {
+      "title": "Principal / Owner",
+      "org": "Rooted Wellness & Recovery LLC",
+      "type": "Minnesota Chapter 319B Professional Firm",
+      "naics": "621420",
+      "focus": "245G SUD licensure, East African and Muslim communities"
+    },
+    {
+      "title": "Grant Strategist",
+      "org": "Multiple — Uplift Treatment Center, Bridge Healing Center, Pathway to Recovery",
+      "focus": "DHS behavioral health and SUD grant proposals"
+    }
+  ],
+  "github": "ahassan507"
+}

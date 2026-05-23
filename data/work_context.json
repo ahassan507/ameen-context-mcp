@@ -1,0 +1,27 @@
+{
+  "role": "Business Analytics Intern",
+  "org": "IDeaS Revenue Solutions",
+  "team": "IDeaS.Lab",
+  "period": "Feb 2026–Present",
+  "work_rhythm": "Sprint-based deliverables",
+  "focus_areas": [
+    "Process mapping (As-Is/To-Be)",
+    "Automation opportunity analysis",
+    "Copilot agent design",
+    "SharePoint/Teams improvement",
+    "Prompt engineering",
+    "Dashboard updates"
+  ],
+  "tool_stack": [
+    "Microsoft Copilot",
+    "Copilot Studio",
+    "Power Automate",
+    "Microsoft Teams",
+    "SharePoint",
+    "Tableau",
+    "Excel",
+    "SQL (developing)",
+    "Microsoft 365"
+  ],
+  "constraint": "Work laptop has Claude Desktop blocked by IT — use Claude Code or personal machine for AI workflows"
+}

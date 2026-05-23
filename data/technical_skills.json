@@ -1,0 +1,38 @@
+{
+  "programming": {
+    "python": "Intermediate — data models, config-driven architecture, CLI tools, FastMCP",
+    "sql": "Developing",
+    "javascript": "Basic"
+  },
+  "microsoft_stack": {
+    "microsoft_365": "Proficient",
+    "excel": "Proficient",
+    "sharepoint": "Working proficiency",
+    "teams": "Working proficiency",
+    "power_automate": "Working proficiency",
+    "copilot_studio": "Working proficiency",
+    "microsoft_copilot": "Advanced — prompt engineering, agent design"
+  },
+  "data_and_analytics": {
+    "tableau": "Working proficiency",
+    "data_modeling": "Intermediate"
+  },
+  "ai_tools": {
+    "claude": "Advanced — Claude Code, MCP, prompt engineering, agent orchestration",
+    "prompt_engineering": "Advanced — structured workflows: Use case → Draft → Test → Evaluate → Revise → Document"
+  },
+  "domain_knowledge": {
+    "behavioral_health": "Advanced — 245G/245I, MHCP, OERAC, DHS grant landscape",
+    "revenue_management": "Developing — hospitality industry context via IDeaS",
+    "process_mapping": "Proficient — As-Is/To-Be, automation opportunity analysis"
+  },
+  "coding_projects": {
+    "base_path": "~/Desktop/Tech & Coding/Coding_projects/",
+    "projects": [
+      {"name": "rfp-project", "desc": "Python RFP intelligence/analysis tool (base version)"},
+      {"name": "rfp_intelligence_pro", "desc": "Advanced Python RFP analysis system (production version)"},
+      {"name": "RFP_Atharii", "desc": "Variant/fork of rfp_intelligence_pro"},
+      {"name": "ameen-context-mcp", "desc": "Personal context MCP server, GitHub-backed"}
+    ]
+  }
+}

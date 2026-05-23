@@ -1,0 +1,43 @@
+{
+  "rooted_wellness": {
+    "full_name": "Rooted Wellness & Recovery LLC",
+    "entity_type": "Minnesota Chapter 319B Professional Firm",
+    "naics": "621420",
+    "primary_goal": "245G SUD licensure (Minnesota DHS)",
+    "target_populations": ["East African communities in Minnesota", "Muslim communities in Minnesota"],
+    "licensure_status": "In progress — 245G is prerequisite for all DHS grant eligibility",
+    "post_licensure_eligibility": [
+      "Minnesota DHS OERAC RFP (Categories A, C, D)",
+      "BHA culturally specific SUD grants",
+      "Other DHS behavioral health funding streams"
+    ]
+  },
+  "grant_clients": [
+    {
+      "name": "Uplift Treatment Center",
+      "location": "Coon Rapids, MN",
+      "grants": ["OERAC Categories A + C", "BHA RFP"],
+      "status": "In development"
+    },
+    {
+      "name": "Bridge Healing Center (BHC)",
+      "location": "St. Cloud, MN",
+      "grants": ["CEMIG", "OERAC Category A Prevention"],
+      "status": "In development"
+    },
+    {
+      "name": "Pathway to Recovery (PTR)",
+      "focus": "MAT expansion, youth-centered SUD",
+      "status": "In development"
+    }
+  ],
+  "domain_expertise": [
+    "Minnesota DHS OERAC RFP",
+    "245G/245I licensure",
+    "MHCP billing",
+    "Culturally specific SUD/MH programming",
+    "254B.01 statutory alignment"
+  ],
+  "key_principle": "Prioritize licensure pathway over grant strategy — cannot apply for grants without the license",
+  "non_billable_note": "Non-billable justification in grant narratives is a core argument — do not bury it"
+}
