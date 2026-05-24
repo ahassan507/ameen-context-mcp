@@ -1,0 +1,144 @@
+{
+  "project": "ideas-lab",
+  "last_updated": "2026-05-24T18:56:26Z",
+  "canonical_summary": "",
+  "known_solutions": [
+    {
+      "problem": "Need to determine which week folder each IDeaS_Lab file belongs to based on modification date",
+      "solution": "IDeaS_Workspace contains Week-01_Feb-03 through at least Week-08_Mar-24 folders",
+      "evidence_sessions": [
+        "2026-04-26-2045-b1626b0d"
+      ]
+    },
+    {
+      "problem": "Conversation transcript is truncated \u2014 only the scheduled task invocation header and an empty synthetic response are visible",
+      "solution": "No results determinable from the truncated transcript",
+      "evidence_sessions": [
+        "2026-05-15-1606-36558f51"
+      ]
+    },
+    {
+      "problem": "IDeaS_Workspace directory not found at ~/Desktop/IDeaS_Workspace/",
+      "solution": "IDeaS_Workspace not present at expected Desktop path",
+      "evidence_sessions": [
+        "2026-05-19-1747-c8f48609"
+      ]
+    }
+  ],
+  "decision_log": [],
+  "open_threads": [
+    {
+      "question": "Did the 'ideas-workspace-weekly-sync' scheduled task execute its intended logic, or did it fail silently?",
+      "sessions": [
+        "2026-05-04-1500-13046a70"
+      ]
+    },
+    {
+      "question": "Why does the assistant response show zero input and output tokens?",
+      "sessions": [
+        "2026-05-04-1500-13046a70"
+      ]
+    },
+    {
+      "question": "Were the IDeaS_Lab and Downloads files successfully moved into their correct weekly folders?",
+      "sessions": [
+        "2026-04-26-2045-b1626b0d"
+      ]
+    },
+    {
+      "question": "Was Week-12_Apr-21 (or the current week folder) created?",
+      "sessions": [
+        "2026-04-26-2045-b1626b0d"
+      ]
+    },
+    {
+      "question": "Did the scheduled task complete its full sync run or exit partway through?",
+      "sessions": [
+        "2026-04-26-2045-b1626b0d"
+      ]
+    },
+    {
+      "question": "What is the full content of the ideas-workspace-weekly-sync scheduled task SKILL.md?",
+      "sessions": [
+        "2026-05-15-1606-36558f51"
+      ]
+    },
+    {
+      "question": "Did the scheduled task execute successfully or fail?",
+      "sessions": [
+        "2026-05-15-1606-36558f51"
+      ]
+    },
+    {
+      "question": "What was the intended output or sync action for the IDeaS workspace weekly sync?",
+      "sessions": [
+        "2026-05-15-1606-36558f51"
+      ]
+    },
+    {
+      "question": "Where is the IDeaS_Workspace directory located if not on the Desktop?",
+      "sessions": [
+        "2026-05-19-1747-c8f48609"
+      ]
+    },
+    {
+      "question": "Was the IDeaS_Workspace ever created or has it been moved/renamed?",
+      "sessions": [
+        "2026-05-19-1747-c8f48609"
+      ]
+    },
+    {
+      "question": "Should the scheduled task path be updated to reflect the correct workspace location?",
+      "sessions": [
+        "2026-05-19-1747-c8f48609"
+      ]
+    }
+  ],
+  "contributors": [],
+  "tag_index": {
+    "scheduled-task": [
+      "2026-05-04-1500-13046a70",
+      "2026-04-26-2045-b1626b0d",
+      "2026-05-15-1606-36558f51",
+      "2026-05-19-1747-c8f48609"
+    ],
+    "ideas-workspace": [
+      "2026-05-04-1500-13046a70"
+    ],
+    "automated-run": [
+      "2026-05-04-1500-13046a70",
+      "2026-04-26-2045-b1626b0d",
+      "2026-05-15-1606-36558f51"
+    ],
+    "no-output": [
+      "2026-05-04-1500-13046a70"
+    ],
+    "ideas-lab": [
+      "2026-04-26-2045-b1626b0d",
+      "2026-05-15-1606-36558f51",
+      "2026-05-19-1747-c8f48609"
+    ],
+    "workspace-sync": [
+      "2026-04-26-2045-b1626b0d",
+      "2026-05-19-1747-c8f48609"
+    ],
+    "file-organization": [
+      "2026-04-26-2045-b1626b0d"
+    ],
+    "weekly-sync": [
+      "2026-05-15-1606-36558f51"
+    ],
+    "truncated-transcript": [
+      "2026-05-15-1606-36558f51"
+    ],
+    "sprint-tracking": [
+      "2026-05-19-1747-c8f48609"
+    ],
+    "missing-directory": [
+      "2026-05-19-1747-c8f48609"
+    ],
+    "permission-error": [
+      "2026-05-19-1747-c8f48609"
+    ]
+  }
+}

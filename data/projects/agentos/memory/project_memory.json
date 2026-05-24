@@ -1,0 +1,493 @@
+{
+  "project": "agentos",
+  "last_updated": "2026-05-24T18:55:09Z",
+  "canonical_summary": "Personal AgentOS build. Extending ameen-context MCP with session memory tools + Claude Code hooks so every session auto-loads relevant project context and auto-saves findings.",
+  "known_solutions": [
+    {
+      "problem": "Memory Vault repo design only activates inside its own directory \u2014 not a global layer.",
+      "solution": "Extend ameen-context MCP (already global via ~/.claude.json) with session memory tools, and wire SessionStart/SessionEnd hooks in ~/.claude/settings.json for auto-load + auto-save.",
+      "evidence_sessions": [
+        "2026-05-24-init"
+      ]
+    },
+    {
+      "problem": "Auto mode classifier blocks programmatic modification of ~/.claude/settings.json to register SessionStart/SessionEnd hooks",
+      "solution": "Edit tool call blocked by auto mode classifier (self-modification guardrail)",
+      "evidence_sessions": [
+        "2026-05-24-1834"
+      ]
+    },
+    {
+      "problem": "How to efficiently score and filter RFP eligibility across multiple criteria",
+      "solution": "Two-tier approach recommended as the scoring architecture for RFP eligibility in rfp_intelligence_pro",
+      "evidence_sessions": [
+        "2026-05-24-1848"
+      ]
+    },
+    {
+      "problem": "How to score RFP eligibility across multiple criteria for grant opportunities",
+      "solution": "No new confirmed results this session \u2014 prior context loaded via SessionStart hook",
+      "evidence_sessions": [
+        "2026-05-24-1850"
+      ]
+    },
+    {
+      "problem": "No substantive user interaction occurred this session to make progress on open threads",
+      "solution": "SessionStart hook loaded prior AgentOS context successfully",
+      "evidence_sessions": [
+        "2026-05-24-1851"
+      ]
+    },
+    {
+      "problem": "15 historical session transcript files across different project directories needed to be backfilled into the structured memory system",
+      "solution": "Confirmed JSONL entries contain a `cwd` field enabling reliable project classification without LLM inference",
+      "evidence_sessions": [
+        "2026-05-24-1346-42c68c22"
+      ]
+    },
+    {
+      "problem": "v3 QA identified 9 issues across the slide deck and facilitator documents",
+      "solution": "8 of 9 QA issues resolved in v3",
+      "evidence_sessions": [
+        "2026-05-23-1545-84fd986f"
+      ]
+    },
+    {
+      "problem": "User was uncertain whether their MCP server(s) were connected",
+      "solution": "Confirmed multiple MCP servers are connected, including computer-use (desktop control/screenshots)",
+      "evidence_sessions": [
+        "2026-05-23-1638-1510da95"
+      ]
+    },
+    {
+      "problem": "ameen-context MCP server not registered in Claude Code after being built and pushed to GitHub",
+      "solution": "settings.json does not support mcpServers as a top-level field",
+      "evidence_sessions": [
+        "2026-05-23-1638-9f53e050"
+      ]
+    },
+    {
+      "problem": "ameen-context MCP server does not appear in `claude mcp list` output",
+      "solution": "`claude mcp list` returned only one server: plugin:github:github (HTTP, failed to connect)",
+      "evidence_sessions": [
+        "2026-05-23-1638-ab528c74"
+      ]
+    }
+  ],
+  "decision_log": [
+    {
+      "decision": "Build session memory as an extension of ameen-context, not as a separate memory-vault repo.",
+      "status": "confirmed",
+      "evidence_sessions": [
+        "2026-05-24-init"
+      ]
+    },
+    {
+      "decision": "v1 classification is keyword + cwd path matching. LLM-based classification deferred to v2.",
+      "status": "confirmed",
+      "evidence_sessions": [
+        "2026-05-24-init"
+      ]
+    },
+    {
+      "decision": "v1 SessionEnd hook does best-effort raw capture and queues for v2 LLM structuring. Model can also call context_save_session directly mid-session for high-quality saves.",
+      "status": "confirmed",
+      "evidence_sessions": [
+        "2026-05-24-init"
+      ]
+    },
+    {
+      "decision": "Use install_hooks.sh as the delivery mechanism for hook registration since direct agent modification is blocked",
+      "status": "confirmed",
+      "evidence_sessions": [
+        "2026-05-24-1834"
+      ]
+    },
+    {
+      "decision": "Use two-tier scoring model with hard gates before weighted scoring",
+      "status": "tentative",
+      "evidence_sessions": [
+        "2026-05-24-1848"
+      ]
+    },
+    {
+      "decision": "Use two-tier scoring model with hard gates before weighted scoring for RFP eligibility",
+      "status": "tentative",
+      "evidence_sessions": [
+        "2026-05-24-1850"
+      ]
+    },
+    {
+      "decision": "Use cwd field from JSONL entries as primary signal for project classification",
+      "status": "confirmed",
+      "evidence_sessions": [
+        "2026-05-24-1346-42c68c22"
+      ]
+    },
+    {
+      "decision": "Update registry.json to include DHS Consulting and IDeaS-Lab project paths",
+      "status": "confirmed",
+      "evidence_sessions": [
+        "2026-05-24-1346-42c68c22"
+      ]
+    },
+    {
+      "decision": "Build backfill script to process 15 historical sessions through the v2 structuring pipeline",
+      "status": "confirmed",
+      "evidence_sessions": [
+        "2026-05-24-1346-42c68c22"
+      ]
+    },
+    {
+      "decision": "Do not edit the PPTX file \u2014 only read it with python-pptx and apply changes to facilitator markdown docs",
+      "status": "confirmed",
+      "evidence_sessions": [
+        "2026-05-23-1545-84fd986f"
+      ]
+    },
+    {
+      "decision": "Use `claude mcp add <name> -s user <interpreter> <script>` for global MCP registration",
+      "status": "confirmed",
+      "evidence_sessions": [
+        "2026-05-23-1638-9f53e050"
+      ]
+    },
+    {
+      "decision": "MCP server config does not go in settings.json",
+      "status": "confirmed",
+      "evidence_sessions": [
+        "2026-05-23-1638-9f53e050"
+      ]
+    }
+  ],
+  "open_threads": [
+    {
+      "question": "v2: how should the structuring pass run \u2014 on next SessionStart, or via a cron/loop?",
+      "sessions": [
+        "2026-05-24-init"
+      ]
+    },
+    {
+      "question": "v2: synthesis pass to collapse repeated patterns across sessions into reusable playbooks.",
+      "sessions": [
+        "2026-05-24-init"
+      ]
+    },
+    {
+      "question": "Has the user run install_hooks.sh to actually register the SessionStart/SessionEnd hooks?",
+      "sessions": [
+        "2026-05-24-1834"
+      ]
+    },
+    {
+      "question": "Are the hooks now active and loading session memory correctly on SessionStart?",
+      "sessions": [
+        "2026-05-24-1834"
+      ]
+    },
+    {
+      "question": "What weighted scoring factors apply after hard gates pass?",
+      "sessions": [
+        "2026-05-24-1848"
+      ]
+    },
+    {
+      "question": "How should the scoring logic be implemented in rfp_intelligence_pro?",
+      "sessions": [
+        "2026-05-24-1848"
+      ]
+    },
+    {
+      "question": "What threshold scores indicate high vs. low priority opportunities?",
+      "sessions": [
+        "2026-05-24-1848"
+      ]
+    },
+    {
+      "question": "Has install_hooks.sh been run to register SessionStart/SessionEnd hooks?",
+      "sessions": [
+        "2026-05-24-1850"
+      ]
+    },
+    {
+      "question": "Are hooks now active and loading session memory correctly on SessionStart?",
+      "sessions": [
+        "2026-05-24-1850"
+      ]
+    },
+    {
+      "question": "What weighted scoring factors apply after hard gates pass?",
+      "sessions": [
+        "2026-05-24-1850"
+      ]
+    },
+    {
+      "question": "What threshold scores indicate high vs. low priority opportunities?",
+      "sessions": [
+        "2026-05-24-1850"
+      ]
+    },
+    {
+      "question": "How should the scoring logic be implemented in rfp_intelligence_pro?",
+      "sessions": [
+        "2026-05-24-1850"
+      ]
+    },
+    {
+      "question": "Has install_hooks.sh been run to register SessionStart/SessionEnd hooks?",
+      "sessions": [
+        "2026-05-24-1851"
+      ]
+    },
+    {
+      "question": "Are hooks now active and loading session memory correctly on SessionStart?",
+      "sessions": [
+        "2026-05-24-1851"
+      ]
+    },
+    {
+      "question": "What weighted scoring factors apply after hard gates pass in RFP eligibility scoring?",
+      "sessions": [
+        "2026-05-24-1851"
+      ]
+    },
+    {
+      "question": "What threshold scores indicate high vs. low priority opportunities?",
+      "sessions": [
+        "2026-05-24-1851"
+      ]
+    },
+    {
+      "question": "How should the two-tier scoring logic be implemented in rfp_intelligence_pro?",
+      "sessions": [
+        "2026-05-24-1851"
+      ]
+    },
+    {
+      "question": "Has the backfill script been run against all 15 historical sessions?",
+      "sessions": [
+        "2026-05-24-1346-42c68c22"
+      ]
+    },
+    {
+      "question": "Did the structuring pass produce valid structured output for the historical sessions?",
+      "sessions": [
+        "2026-05-24-1346-42c68c22"
+      ]
+    },
+    {
+      "question": "Are there any project directories that still lack registry entries after the two additions?",
+      "sessions": [
+        "2026-05-24-1346-42c68c22"
+      ]
+    },
+    {
+      "question": "What is the correct wording for slide 16 and who will fix it?",
+      "sessions": [
+        "2026-05-23-1545-84fd986f"
+      ]
+    },
+    {
+      "question": "What are the actual TIME and LINK values for the morning email?",
+      "sessions": [
+        "2026-05-23-1545-84fd986f"
+      ]
+    },
+    {
+      "question": "Was the session fully done after the email draft or were there remaining items?",
+      "sessions": [
+        "2026-05-23-1545-84fd986f"
+      ]
+    },
+    {
+      "question": "Whether all expected MCP servers are connected and functioning correctly beyond the ones listed",
+      "sessions": [
+        "2026-05-23-1638-1510da95"
+      ]
+    },
+    {
+      "question": "Did `claude mcp add ameen-context -s user python3 ...` succeed after the transcript cut off?",
+      "sessions": [
+        "2026-05-23-1638-9f53e050"
+      ]
+    },
+    {
+      "question": "Is the ameen-context server now showing in `claude mcp list`?",
+      "sessions": [
+        "2026-05-23-1638-9f53e050"
+      ]
+    },
+    {
+      "question": "Does the server load correctly and respond to tool calls?",
+      "sessions": [
+        "2026-05-23-1638-9f53e050"
+      ]
+    },
+    {
+      "question": "Why is ameen-context not appearing in `claude mcp list`?",
+      "sessions": [
+        "2026-05-23-1638-ab528c74"
+      ]
+    },
+    {
+      "question": "Was `claude mcp add ameen-context -s user python3 ...` ever successfully run?",
+      "sessions": [
+        "2026-05-23-1638-ab528c74"
+      ]
+    },
+    {
+      "question": "Is the GitHub Copilot MCP failure transient or a persistent misconfiguration?",
+      "sessions": [
+        "2026-05-23-1638-ab528c74"
+      ]
+    }
+  ],
+  "contributors": [
+    "Ameen Hassan"
+  ],
+  "tag_index": {
+    "agentos": [
+      "2026-05-24-init",
+      "2026-05-24-1850",
+      "2026-05-24-1851",
+      "2026-05-24-1346-42c68c22",
+      "2026-05-23-1638-9f53e050"
+    ],
+    "mcp": [
+      "2026-05-24-init",
+      "2026-05-23-1638-1510da95",
+      "2026-05-23-1638-ab528c74"
+    ],
+    "hooks": [
+      "2026-05-24-init",
+      "2026-05-24-1834",
+      "2026-05-24-1850",
+      "2026-05-24-1346-42c68c22"
+    ],
+    "session-memory": [
+      "2026-05-24-init",
+      "2026-05-24-1834",
+      "2026-05-24-1850",
+      "2026-05-24-1851",
+      "2026-05-24-1346-42c68c22"
+    ],
+    "agentOS": [
+      "2026-05-24-1834"
+    ],
+    "settings-json": [
+      "2026-05-24-1834"
+    ],
+    "install-hooks": [
+      "2026-05-24-1834"
+    ],
+    "self-modification-guardrail": [
+      "2026-05-24-1834"
+    ],
+    "ameen-context-mcp": [
+      "2026-05-24-1834",
+      "2026-05-24-1850",
+      "2026-05-24-1346-42c68c22"
+    ],
+    "rfp": [
+      "2026-05-24-1848"
+    ],
+    "eligibility-scoring": [
+      "2026-05-24-1848"
+    ],
+    "grant-strategy": [
+      "2026-05-24-1848"
+    ],
+    "rfp-intelligence-pro": [
+      "2026-05-24-1848"
+    ],
+    "245g": [
+      "2026-05-24-1848"
+    ],
+    "two-tier-scoring": [
+      "2026-05-24-1848"
+    ],
+    "rfp-scoring": [
+      "2026-05-24-1850",
+      "2026-05-24-1851"
+    ],
+    "grant-intelligence": [
+      "2026-05-24-1850"
+    ],
+    "hook-infrastructure": [
+      "2026-05-24-1851"
+    ],
+    "minimal-session": [
+      "2026-05-24-1851"
+    ],
+    "backfill": [
+      "2026-05-24-1346-42c68c22"
+    ],
+    "project-registry": [
+      "2026-05-24-1346-42c68c22"
+    ],
+    "jsonl": [
+      "2026-05-24-1346-42c68c22"
+    ],
+    "structuring-pipeline": [
+      "2026-05-24-1346-42c68c22"
+    ],
+    "dhs-consulting": [
+      "2026-05-23-1545-84fd986f"
+    ],
+    "workshop-1": [
+      "2026-05-23-1545-84fd986f"
+    ],
+    "building-bridges": [
+      "2026-05-23-1545-84fd986f"
+    ],
+    "facilitator-docs": [
+      "2026-05-23-1545-84fd986f"
+    ],
+    "qa": [
+      "2026-05-23-1545-84fd986f"
+    ],
+    "pdf-conversion": [
+      "2026-05-23-1545-84fd986f"
+    ],
+    "pre-workshop-email": [
+      "2026-05-23-1545-84fd986f"
+    ],
+    "connectivity-check": [
+      "2026-05-23-1638-1510da95"
+    ],
+    "session-start": [
+      "2026-05-23-1638-1510da95"
+    ],
+    "tooling": [
+      "2026-05-23-1638-1510da95"
+    ],
+    "mcp-server": [
+      "2026-05-23-1638-9f53e050"
+    ],
+    "claude-code-config": [
+      "2026-05-23-1638-9f53e050"
+    ],
+    "ameen-context": [
+      "2026-05-23-1638-9f53e050",
+      "2026-05-23-1638-ab528c74"
+    ],
+    "registration": [
+      "2026-05-23-1638-9f53e050"
+    ],
+    "settings": [
+      "2026-05-23-1638-9f53e050"
+    ],
+    "mcp-registration": [
+      "2026-05-23-1638-ab528c74"
+    ],
+    "claude-mcp-list": [
+      "2026-05-23-1638-ab528c74"
+    ],
+    "github-copilot": [
+      "2026-05-23-1638-ab528c74"
+    ],
+    "debugging": [
+      "2026-05-23-1638-ab528c74"
+    ]
+  }
+}

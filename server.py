@@ -14,6 +14,8 @@ mcp = FastMCP("ameen-context")
 
 DATA_DIR = Path(__file__).parent / "data"
 MEMORIES_DIR = DATA_DIR / "memories"
+PROJECTS_DIR = DATA_DIR / "projects"
+REGISTRY_PATH = PROJECTS_DIR / "registry.json"
 
 
 def _load(filename: str) -> dict | list:
@@ -120,6 +122,218 @@ def context_add_memory(title: str, content: str, tags: list[str] | None = None) 
     filepath.write_text(frontmatter + content)
 
     return json.dumps({"saved": filename, "path": str(filepath)})
+
+
+# ---------------------------------------------------------------------------
+# Session Memory tools (AgentOS layer)
+# ---------------------------------------------------------------------------
+
+
+def _load_registry() -> dict:
+    with open(REGISTRY_PATH) as f:
+        return json.load(f)
+
+
+def _project_memory_path(project: str) -> Path:
+    return PROJECTS_DIR / project / "memory" / "project_memory.json"
+
+
+def _load_project_memory(project: str) -> dict:
+    path = _project_memory_path(project)
+    if not path.exists():
+        return {}
+    with open(path) as f:
+        return json.load(f)
+
+
+def _write_project_memory(project: str, memory: dict) -> None:
+    path = _project_memory_path(project)
+    path.parent.mkdir(parents=True, exist_ok=True)
+    with open(path, "w") as f:
+        json.dump(memory, f, indent=2)
+
+
+def _ensure_project(project: str) -> None:
+    """Create folder structure for a new project if missing, and add to registry."""
+    proj_dir = PROJECTS_DIR / project
+    (proj_dir / "sessions").mkdir(parents=True, exist_ok=True)
+    (proj_dir / "memory").mkdir(parents=True, exist_ok=True)
+    mem_path = _project_memory_path(project)
+    if not mem_path.exists():
+        _write_project_memory(project, {
+            "project": project,
+            "last_updated": "",
+            "canonical_summary": "",
+            "known_solutions": [],
+            "decision_log": [],
+            "open_threads": [],
+            "contributors": [],
+            "tag_index": {},
+        })
+    registry = _load_registry()
+    if not any(p["name"] == project for p in registry["projects"]):
+        registry["projects"].append({
+            "name": project,
+            "keywords": [project.replace("-", " ")],
+            "description": f"Auto-created project: {project}",
+            "paths": [],
+        })
+        with open(REGISTRY_PATH, "w") as f:
+            json.dump(registry, f, indent=2)
+
+
+@mcp.tool()
+def context_list_projects() -> str:
+    """List all known projects with keywords and descriptions. Use to see what project slugs exist."""
+    return _fmt(_load_registry())
+
+
+@mcp.tool()
+def context_classify_session(content: str, cwd: str = "") -> str:
+    """
+    Classify session content to a project using keyword + path matching.
+    Returns the best-match project slug, plus scores for transparency.
+
+    Args:
+        content: session summary, transcript excerpt, or topic description
+        cwd: optional current working directory of the session
+    """
+    registry = _load_registry()
+    text = (content + " " + cwd).lower()
+    scores = []
+    for proj in registry["projects"]:
+        score = 0
+        for kw in proj.get("keywords", []):
+            if kw.lower() in text:
+                score += 2
+        for path in proj.get("paths", []):
+            if path.lower() in cwd.lower():
+                score += 5
+        scores.append({"project": proj["name"], "score": score})
+    scores.sort(key=lambda x: x["score"], reverse=True)
+    top = scores[0] if scores else {"project": None, "score": 0}
+    return json.dumps({
+        "best_match": top["project"] if top["score"] > 0 else None,
+        "confidence": top["score"],
+        "scores": scores,
+    }, indent=2)
+
+
+@mcp.tool()
+def context_get_project_memory(project: str) -> str:
+    """
+    Return the full project memory file for a project: solutions, decisions,
+    open threads, contributors, tags.
+
+    Args:
+        project: project slug (use context_list_projects to see options)
+    """
+    mem = _load_project_memory(project)
+    if not mem:
+        return json.dumps({"error": f"no memory file for project '{project}'"})
+    return _fmt(mem)
+
+
+@mcp.tool()
+def context_save_session(
+    project: str,
+    summary: str,
+    problems: list[str] | None = None,
+    approaches: list[str] | None = None,
+    results: list[str] | None = None,
+    decisions: list[dict] | None = None,
+    open_questions: list[str] | None = None,
+    tags: list[str] | None = None,
+    author: str = "Ameen Hassan",
+) -> str:
+    """
+    Save a structured session memory to a project's vault, and merge into project memory.
+
+    Args:
+        project: project slug. If new, the project is auto-created.
+        summary: 5-10 sentence factual summary of the session.
+        problems: problems discussed.
+        approaches: approaches tried.
+        results: outcomes and findings.
+        decisions: list of {"decision": "...", "status": "confirmed|tentative|reversed"}.
+        open_questions: unresolved questions.
+        tags: lowercase tags for indexing.
+        author: defaults to "Ameen Hassan".
+    """
+    _ensure_project(project)
+    now = datetime.utcnow()
+    session_id = now.strftime("%Y-%m-%d-%H%M")
+    timestamp = now.strftime("%Y-%m-%dT%H:%M:%SZ")
+
+    session = {
+        "session_id": session_id,
+        "timestamp": timestamp,
+        "author": author,
+        "project": project,
+        "summary": summary,
+        "problems": problems or [],
+        "approaches": approaches or [],
+        "results": results or [],
+        "decisions": decisions or [],
+        "open_questions": open_questions or [],
+        "tags": [t.lower() for t in (tags or [])],
+    }
+
+    # Write session file
+    safe_author = author.replace(" ", "_")
+    session_path = PROJECTS_DIR / project / "sessions" / f"{session_id}_{safe_author}.json"
+    session_path.parent.mkdir(parents=True, exist_ok=True)
+    with open(session_path, "w") as f:
+        json.dump(session, f, indent=2)
+
+    # Merge into project memory
+    memory = _load_project_memory(project)
+    memory.setdefault("project", project)
+    memory["last_updated"] = timestamp
+
+    # Append solutions (problem + first result as solution heuristic)
+    if session["problems"] and session["results"]:
+        memory.setdefault("known_solutions", []).append({
+            "problem": session["problems"][0],
+            "solution": session["results"][0],
+            "evidence_sessions": [session_id],
+        })
+
+    # Append decisions
+    for d in session["decisions"]:
+        memory.setdefault("decision_log", []).append({
+            "decision": d.get("decision", ""),
+            "status": d.get("status", "tentative"),
+            "evidence_sessions": [session_id],
+        })
+
+    # Append open threads
+    for q in session["open_questions"]:
+        memory.setdefault("open_threads", []).append({
+            "question": q,
+            "sessions": [session_id],
+        })
+
+    # Contributors
+    contributors = set(memory.get("contributors", []))
+    contributors.add(author)
+    memory["contributors"] = sorted(contributors)
+
+    # Tag index
+    tag_index = memory.setdefault("tag_index", {})
+    for t in session["tags"]:
+        tag_index.setdefault(t, []).append(session_id)
+
+    _write_project_memory(project, memory)
+
+    return json.dumps({
+        "saved": True,
+        "session_id": session_id,
+        "project": project,
+        "session_path": str(session_path),
+        "decisions_recorded": len(session["decisions"]),
+        "open_questions_recorded": len(session["open_questions"]),
+    }, indent=2)
 
 
 if __name__ == "__main__":

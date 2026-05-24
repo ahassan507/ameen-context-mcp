@@ -1,0 +1,46 @@
+{
+  "projects": [
+    {
+      "name": "agentos",
+      "keywords": ["agentos", "agent os", "memory vault", "session memory", "mcp", "ameen-context", "hooks", "claude code setup"],
+      "description": "Building the personal Agentic OS — MCP servers, hooks, agents, session memory infrastructure.",
+      "paths": ["ameen-context-mcp", "Workshop_1_Files", "claude code"]
+    },
+    {
+      "name": "rooted-wellness",
+      "keywords": ["rooted wellness", "rooted", "245g", "245i", "licensure", "dhs licensure", "319b"],
+      "description": "Rooted Wellness & Recovery LLC — 245G SUD licensure work, East African/Muslim community focus.",
+      "paths": []
+    },
+    {
+      "name": "uplift-grants",
+      "keywords": ["uplift", "uplift treatment", "coon rapids", "oerac a", "oerac c", "bha rfp"],
+      "description": "Uplift Treatment Center grant strategy — OERAC A+C, BHA RFP.",
+      "paths": []
+    },
+    {
+      "name": "bhc-grants",
+      "keywords": ["bhc", "bridge healing", "st cloud", "cemig", "oerac category a prevention", "prevention"],
+      "description": "Bridge Healing Center grant strategy — CEMIG, OERAC Category A Prevention.",
+      "paths": []
+    },
+    {
+      "name": "ptr-grants",
+      "keywords": ["ptr", "pathway to recovery", "mat expansion", "youth sud", "medication assisted treatment"],
+      "description": "Pathway to Recovery grant strategy — MAT expansion, youth-centered SUD.",
+      "paths": []
+    },
+    {
+      "name": "rfp-tooling",
+      "keywords": ["rfp_intelligence_pro", "rfp-project", "rfp_atharii", "rfp tooling", "rfp analysis", "rfp intelligence"],
+      "description": "RFP intelligence Python tooling — analysis, scoring, requirement extraction.",
+      "paths": ["rfp_intelligence_pro", "rfp-project", "RFP_Atharii"]
+    },
+    {
+      "name": "ideas-lab",
+      "keywords": ["ideas", "ideas.lab", "ideas lab", "ideas revenue", "copilot studio", "power automate", "sharepoint", "sprint deliverable"],
+      "description": "IDeaS Revenue Solutions / IDeaS.Lab internship — Copilot agents, automation, process mapping.",
+      "paths": ["IDeaS-Lab", "IDeaS Lab", "IDeaS_Lab"]
+    }
+  ]
+}

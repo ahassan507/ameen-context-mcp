@@ -1,0 +1,42 @@
+{
+  "session_id": "2026-05-24-1848",
+  "timestamp": "2026-05-24T18:48:53Z",
+  "author": "Ameen Hassan",
+  "project": "agentos",
+  "summary": "Session involved a question about how to score RFP eligibility for grant opportunities. Assistant recommended a two-tier scoring approach: hard gates (pass/fail) first to check mandatory criteria such as 245G licensure, geographic service area, organization type, and prior grant restrictions, followed by weighted scoring for competitive factors. The approach was designed to quickly eliminate ineligible opportunities before investing analysis effort. The context was the rfp_intelligence_pro tooling project.",
+  "problems": [
+    "How to efficiently score and filter RFP eligibility across multiple criteria",
+    "How to handle mandatory vs. competitive eligibility criteria in scoring logic"
+  ],
+  "approaches": [
+    "Two-tier scoring: hard gates (pass/fail) first, then weighted scoring for competitive factors",
+    "Hard gates include: 245G licensure requirement, geographic service area match, organization type match, prior grant restrictions"
+  ],
+  "results": [
+    "Two-tier approach recommended as the scoring architecture for RFP eligibility in rfp_intelligence_pro",
+    "Hard gate criteria identified: 245G licensure, geography, org type, grant exclusivity"
+  ],
+  "decisions": [
+    {
+      "decision": "Use two-tier scoring model with hard gates before weighted scoring",
+      "status": "tentative"
+    }
+  ],
+  "open_questions": [
+    "What weighted scoring factors apply after hard gates pass?",
+    "How should the scoring logic be implemented in rfp_intelligence_pro?",
+    "What threshold scores indicate high vs. low priority opportunities?"
+  ],
+  "tags": [
+    "rfp",
+    "eligibility-scoring",
+    "grant-strategy",
+    "rfp-intelligence-pro",
+    "245g",
+    "two-tier-scoring"
+  ],
+  "source_cwd": "/Users/ameenhassan/Desktop/Tech & Coding/Coding_projects/ameen-context-mcp",
+  "source_session_id": "0eaa59f4-f6ad-48e6-87a5-747dbfe814b8",
+  "raw_excerpt": "[queue-operation] You are extracting structured session memory from a Claude Code conversation transcript.\n\nReturn ONLY a valid JSON object with these exact fields:\n{\n  \"summary\": \"5-10 sentence factual summary of what was discussed and accomplished\",\n  \"problems\": [\"list of problems or questions discussed\"],\n  \"approaches\": [\"list of approaches or solutions tried\"],\n  \"results\": [\"list of outcomes, findings, or co\n[user] {\"role\": \"user\", \"content\": \"You are extracting structured session memory from a Claude Code conversation transcript.\\n\\nReturn ONLY a valid JSON object with these exact fields:\\n{\\n  \\\"summary\\\": \\\"5-10 sentence factual summary of what was discussed and accomplished\\\",\\n  \\\"problems\\\": [\\\"list of problems or questions discussed\\\"],\\n  \\\"approaches\\\": [\\\"list of approaches or solutions tried\\\"],\\n\n[assistant] {\"model\": \"claude-sonnet-4-6\", \"id\": \"msg_01UKCdSvUxDgozZ7xBT75nuU\", \"type\": \"message\", \"role\": \"assistant\", \"content\": [{\"type\": \"thinking\", \"thinking\": \"The user wants me to extract structured session memory from a conversation transcript. Let me analyze the transcript:\\n\\n1. User asked about how to score RFP eligibility\\n2. Assistant provided a two-tier approach: hard gates first, then weighted\n[assistant] {\"model\": \"claude-sonnet-4-6\", \"id\": \"msg_01UKCdSvUxDgozZ7xBT75nuU\", \"type\": \"message\", \"role\": \"assistant\", \"content\": [{\"type\": \"text\", \"text\": \"```json\\n{\\n  \\\"summary\\\": \\\"User asked how to score RFP eligibility. Assistant recommended a two-tier approach: hard gates (pass/fail) first to check mandatory criteria like 245G licensure, geographic service area, org type, and prior grant restriction",
+  "structured_at": "2026-05-24T18:50:01Z"
+}

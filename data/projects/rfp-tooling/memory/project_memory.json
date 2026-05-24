@@ -1,0 +1,81 @@
+{
+  "project": "rfp-tooling",
+  "last_updated": "2026-05-24T18:55:21Z",
+  "canonical_summary": "",
+  "known_solutions": [
+    {
+      "problem": "How to structure RFP eligibility scoring",
+      "solution": "Recommended framework: eliminate ineligible applicants via hard gates before applying weighted scoring",
+      "evidence_sessions": [
+        "2026-05-24-1840"
+      ]
+    },
+    {
+      "problem": "How to score RFP eligibility accurately and efficiently",
+      "solution": "Recommendation given: check mandatory eligibility criteria as binary pass/fail before applying any weighted scoring rubric",
+      "evidence_sessions": [
+        "2026-05-24-1340-159db8f1"
+      ]
+    }
+  ],
+  "decision_log": [],
+  "open_threads": [
+    {
+      "question": "What weighted scoring criteria and weights should follow the hard gate pass/fail check?",
+      "sessions": [
+        "2026-05-24-1840"
+      ]
+    },
+    {
+      "question": "Which specific RFP is this scoring framework being designed for?",
+      "sessions": [
+        "2026-05-24-1840"
+      ]
+    },
+    {
+      "question": "What specific RFP is being scored?",
+      "sessions": [
+        "2026-05-24-1340-159db8f1"
+      ]
+    },
+    {
+      "question": "What weights or criteria should be used in the weighted scoring tier?",
+      "sessions": [
+        "2026-05-24-1340-159db8f1"
+      ]
+    },
+    {
+      "question": "Is this for rfp_intelligence_pro or a grant-specific workflow?",
+      "sessions": [
+        "2026-05-24-1340-159db8f1"
+      ]
+    }
+  ],
+  "contributors": [],
+  "tag_index": {
+    "rfp": [
+      "2026-05-24-1840",
+      "2026-05-24-1340-159db8f1"
+    ],
+    "eligibility-scoring": [
+      "2026-05-24-1840",
+      "2026-05-24-1340-159db8f1"
+    ],
+    "grant-strategy": [
+      "2026-05-24-1840",
+      "2026-05-24-1340-159db8f1"
+    ],
+    "245g": [
+      "2026-05-24-1840"
+    ],
+    "hard-gates": [
+      "2026-05-24-1840"
+    ],
+    "weighted-scoring": [
+      "2026-05-24-1840"
+    ],
+    "scoring-methodology": [
+      "2026-05-24-1340-159db8f1"
+    ]
+  }
+}
