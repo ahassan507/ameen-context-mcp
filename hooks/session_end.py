@@ -1,23 +1,25 @@
 #!/usr/bin/env python3
 """
-SessionEnd / Stop hook: extract structured findings from the session transcript
-and save to the project vault.
+SessionEnd / Stop hook (v2): capture session transcript and immediately
+dispatch a background structuring pass via claude CLI.
 
 Claude Code passes a JSON object on stdin with:
   - transcript_path: path to the session transcript JSONL
   - cwd, session_id, hook_event_name
 
-For v1 we do best-effort, no LLM call:
+v2 behaviour:
   - read last N messages of the transcript
   - classify by cwd to a project
-  - write a raw session record with the transcript excerpt as summary
-  - append a queue entry for later LLM-based structuring (v2)
+  - write a raw session record
+  - launch structure_sessions.py --file in a detached background process
+    (hook returns immediately; structuring runs after session exits)
 
 The model can also call context_save_session directly during the session for
 high-quality structured saves. This hook is the safety net.
 """
 
 import json
+import subprocess
 import sys
 from datetime import datetime
 from pathlib import Path
@@ -28,6 +30,7 @@ PROJECTS_DIR = DATA_DIR / "projects"
 REGISTRY_PATH = PROJECTS_DIR / "registry.json"
 QUEUE_PATH = DATA_DIR / "_pending_structuring.jsonl"
 LOG_PATH = DATA_DIR / "_hook.log"
+STRUCTURE_SCRIPT = REPO / "hooks" / "structure_sessions.py"
 
 
 def log(msg: str) -> None:
@@ -138,7 +141,7 @@ def main() -> int:
     with open(out_path, "w") as f:
         json.dump(session, f, indent=2)
 
-    # Queue for later LLM-based structuring (v2)
+    # Also append to queue (so manual re-runs and --all still work)
     with open(QUEUE_PATH, "a") as f:
         f.write(json.dumps({
             "session_path": str(out_path),
@@ -147,6 +150,20 @@ def main() -> int:
         }) + "\n")
 
     log(f"saved {out_path} (project={project})")
+
+    # v2: fire structuring in a detached background process so the hook
+    # returns immediately and doesn't block session shutdown.
+    try:
+        subprocess.Popen(
+            [sys.executable, str(STRUCTURE_SCRIPT), "--file", str(out_path)],
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL,
+            start_new_session=True,  # detach from parent process group
+        )
+        log(f"dispatched background structuring for {out_path.name}")
+    except Exception as e:
+        log(f"background structuring dispatch failed: {e} — session queued for manual run")
+
     return 0
 
 

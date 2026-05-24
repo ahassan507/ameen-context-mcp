@@ -163,12 +163,16 @@ def _merge_into_project_memory(project: str, session: dict) -> None:
         })
         changed = True
 
+    existing_questions = {t.get("question", "").strip().lower()
+                          for t in memory.get("open_threads", [])}
     for q in session.get("open_questions", []):
-        memory.setdefault("open_threads", []).append({
-            "question": q,
-            "sessions": [sid],
-        })
-        changed = True
+        if q.strip().lower() not in existing_questions:
+            memory.setdefault("open_threads", []).append({
+                "question": q,
+                "sessions": [sid],
+            })
+            existing_questions.add(q.strip().lower())
+            changed = True
 
     tag_index = memory.setdefault("tag_index", {})
     for t in session.get("tags", []):

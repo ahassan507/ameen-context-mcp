@@ -1,7 +1,7 @@
 {
   "project": "agentos",
-  "last_updated": "2026-05-24T18:55:09Z",
-  "canonical_summary": "Personal AgentOS build. Extending ameen-context MCP with session memory tools + Claude Code hooks so every session auto-loads relevant project context and auto-saves findings.",
+  "last_updated": "2026-05-24T20:18:50Z",
+  "canonical_summary": "AgentOS is a personal session memory layer built on top of the ameen-context MCP server, designed so every Claude Code session auto-loads relevant project context at startup and auto-saves findings at close. The core infrastructure is complete: SessionStart and SessionEnd hooks, a `context_save_session` MCP tool, a v1 keyword+cwd-based project classifier, and a backfill pipeline for processing 15 historical session transcripts through the structured memory system. Hook registration via direct agent modification of `~/.claude/settings.json` is blocked by Claude Code's auto-mode guardrails, so `install_hooks.sh` is the designated delivery mechanism for wiring hooks globally \u2014 the SessionStart hook is confirmed functional and loading context at session open. The MCP server is registered via `claude mcp add ameen-context -s user python3 ...` and responding to tool calls, though open questions remain about reliability of `claude mcp list` visibility across sessions. Next priorities are validating backfill pipeline output quality against the 15 historical transcripts, confirming hook registration stability end-to-end via install_hooks.sh, and deferring LLM-based session classification to a v2 pass once v1 is stable.",
   "known_solutions": [
     {
       "problem": "Memory Vault repo design only activates inside its own directory \u2014 not a global layer.",
@@ -71,6 +71,90 @@
       "solution": "`claude mcp list` returned only one server: plugin:github:github (HTTP, failed to connect)",
       "evidence_sessions": [
         "2026-05-23-1638-ab528c74"
+      ]
+    },
+    {
+      "problem": "Session transcript was a nested queue operation (memory extractor processing a prior memory extractor pass), making content sparse",
+      "solution": "Confirmed the prior session was a canonical summary update pass for the agentos project",
+      "evidence_sessions": [
+        "2026-05-24-2017"
+      ]
+    },
+    {
+      "problem": "Existing canonical summary needed to be updated to reflect recent session progress on AgentOS",
+      "solution": "Updated canonical summary produced for agentos project reflecting completed core infrastructure",
+      "evidence_sessions": [
+        "2026-05-24-2017"
+      ]
+    },
+    {
+      "problem": "Recursive session memory extraction: the input transcript was itself a memory extraction queue operation, not a primary development session",
+      "solution": "Confirmed the prior session was a canonical summary update pass for the agentos project memory",
+      "evidence_sessions": [
+        "2026-05-24-2017"
+      ]
+    },
+    {
+      "problem": "No canonical project summary existed for rfp-tooling",
+      "solution": "Canonical project summary written for rfp-tooling: characterizes it as an RFP eligibility analysis and scoring system for Minnesota DHS behavioral health funding streams",
+      "evidence_sessions": [
+        "2026-05-24-2017"
+      ]
+    },
+    {
+      "problem": "Extracting structured memory from a transcript that was itself a queue operation (meta-extraction)",
+      "solution": "Produced a valid JSON memory object summarizing the prior canonical summary update session",
+      "evidence_sessions": [
+        "2026-05-24-2017"
+      ]
+    },
+    {
+      "problem": "Input transcript was a recursive queue operation (memory extractor processing a prior memory extraction session), requiring identification of the meta-role rather than treating it as a standard feature session",
+      "solution": "Valid JSON memory object produced for a recursively nested queue operation",
+      "evidence_sessions": [
+        "2026-05-24-2017"
+      ]
+    },
+    {
+      "problem": "Nested queue operation: extracting memory from a transcript that was itself a memory extraction pass",
+      "solution": "Structured JSON memory object returned for a session that was itself an automated memory extraction queue operation",
+      "evidence_sessions": [
+        "2026-05-24-2018"
+      ]
+    },
+    {
+      "problem": "IDeaS_Workspace directory was not found on the Desktop during the automated weekly sync task",
+      "solution": "Canonical summary produced for ideas-lab project describing IDeaS Revenue Solutions internship work and sprint-based workspace structure",
+      "evidence_sessions": [
+        "2026-05-24-2018"
+      ]
+    },
+    {
+      "problem": "Input transcript was a triply-nested recursive queue operation (memory extractor processing a prior memory extractor processing a prior memory extractor)",
+      "solution": "Valid JSON memory object produced for a triply-nested recursive queue operation",
+      "evidence_sessions": [
+        "2026-05-24-2018"
+      ]
+    },
+    {
+      "problem": "No canonical project summary existed for rfp-tooling prior to the referenced session",
+      "solution": "Canonical project summary written for rfp-tooling: characterizes it as an RFP eligibility and scoring tool for Minnesota DHS behavioral health funding",
+      "evidence_sessions": [
+        "2026-05-24-2018"
+      ]
+    },
+    {
+      "problem": "Input transcript was a nested queue operation (memory extractor processing a prior memory extraction session), creating a recursion in the memory pipeline",
+      "solution": "Valid JSON memory object produced for a recursively nested queue operation session",
+      "evidence_sessions": [
+        "2026-05-24-2018"
+      ]
+    },
+    {
+      "problem": "No canonical project summary existed for ideas-lab prior to the prior session",
+      "solution": "Valid JSON memory object produced for the ideas-lab canonical summary session",
+      "evidence_sessions": [
+        "2026-05-24-2018"
       ]
     }
   ],
@@ -158,6 +242,83 @@
       "evidence_sessions": [
         "2026-05-23-1638-9f53e050"
       ]
+    },
+    {
+      "decision": "Use queue-operation pattern for canonical summary updates rather than inline editing",
+      "status": "confirmed",
+      "evidence_sessions": [
+        "2026-05-24-2017"
+      ]
+    },
+    {
+      "decision": "Treat recursive queue operations as valid sessions with summary reflecting their meta-role",
+      "status": "confirmed",
+      "evidence_sessions": [
+        "2026-05-24-2017"
+      ]
+    },
+    {
+      "decision": "Two-tier eligibility scoring approach (hard gates first, then weighted scoring) is the intended design direction for rfp-tooling",
+      "status": "tentative",
+      "evidence_sessions": [
+        "2026-05-24-2017"
+      ]
+    },
+    {
+      "decision": "Treat recursive queue operations as valid sessions with summary reflecting their meta-role",
+      "status": "confirmed",
+      "evidence_sessions": [
+        "2026-05-24-2017"
+      ]
+    },
+    {
+      "decision": "Treat recursive queue operations as valid sessions with summary reflecting their meta-role",
+      "status": "confirmed",
+      "evidence_sessions": [
+        "2026-05-24-2018"
+      ]
+    },
+    {
+      "decision": "Use queue-operation pattern for canonical summary generation when no existing summary exists",
+      "status": "confirmed",
+      "evidence_sessions": [
+        "2026-05-24-2018"
+      ]
+    },
+    {
+      "decision": "Treat triply-nested recursive queue operations as valid sessions with summary reflecting their meta-role",
+      "status": "confirmed",
+      "evidence_sessions": [
+        "2026-05-24-2018"
+      ]
+    },
+    {
+      "decision": "Use queue-operation pattern for canonical summary updates rather than inline editing",
+      "status": "confirmed",
+      "evidence_sessions": [
+        "2026-05-24-2018"
+      ]
+    },
+    {
+      "decision": "Treat recursive queue operations as valid sessions with summary reflecting their meta-role",
+      "status": "confirmed",
+      "evidence_sessions": [
+        "2026-05-24-2018"
+      ]
+    },
+    {
+      "decision": "Treat recursive queue operations as valid sessions with summary reflecting their meta-role",
+      "status": "confirmed",
+      "evidence_sessions": [
+        "2026-05-24-2018"
+      ]
+    },
+    {
+      "decision": "Treat recursive queue operations as valid sessions with summary reflecting their meta-role",
+      "status": "confirmed",
+      "evidence_sessions": [
+        "2026-05-24-2018"
+      ]
     }
   ],
   "open_threads": [
@@ -216,43 +377,7 @@
       ]
     },
     {
-      "question": "What weighted scoring factors apply after hard gates pass?",
-      "sessions": [
-        "2026-05-24-1850"
-      ]
-    },
-    {
-      "question": "What threshold scores indicate high vs. low priority opportunities?",
-      "sessions": [
-        "2026-05-24-1850"
-      ]
-    },
-    {
-      "question": "How should the scoring logic be implemented in rfp_intelligence_pro?",
-      "sessions": [
-        "2026-05-24-1850"
-      ]
-    },
-    {
-      "question": "Has install_hooks.sh been run to register SessionStart/SessionEnd hooks?",
-      "sessions": [
-        "2026-05-24-1851"
-      ]
-    },
-    {
-      "question": "Are hooks now active and loading session memory correctly on SessionStart?",
-      "sessions": [
-        "2026-05-24-1851"
-      ]
-    },
-    {
       "question": "What weighted scoring factors apply after hard gates pass in RFP eligibility scoring?",
-      "sessions": [
-        "2026-05-24-1851"
-      ]
-    },
-    {
-      "question": "What threshold scores indicate high vs. low priority opportunities?",
       "sessions": [
         "2026-05-24-1851"
       ]
@@ -340,6 +465,66 @@
       "sessions": [
         "2026-05-23-1638-ab528c74"
       ]
+    },
+    {
+      "question": "Whether the canonical summary update was actually persisted successfully in the MCP server",
+      "sessions": [
+        "2026-05-24-2017"
+      ]
+    },
+    {
+      "question": "Whether the canonical summary update from the prior session was actually persisted successfully in the MCP server",
+      "sessions": [
+        "2026-05-24-2017"
+      ]
+    },
+    {
+      "question": "When will implementation of the rfp-tooling scoring system begin?",
+      "sessions": [
+        "2026-05-24-2017"
+      ]
+    },
+    {
+      "question": "Which specific RFP categories and funding streams should the tool prioritize first?",
+      "sessions": [
+        "2026-05-24-2017"
+      ]
+    },
+    {
+      "question": "What data inputs will the scoring system consume (RFP documents, org profile, licensure status)?",
+      "sessions": [
+        "2026-05-24-2017"
+      ]
+    },
+    {
+      "question": "Whether the canonical summary update from prior sessions was actually persisted successfully in the MCP server",
+      "sessions": [
+        "2026-05-24-2017"
+      ]
+    },
+    {
+      "question": "Why was the IDeaS_Workspace directory not found during the automated weekly sync for 2026-05-18?",
+      "sessions": [
+        "2026-05-24-2018"
+      ]
+    },
+    {
+      "question": "Was the produced canonical summary actually persisted to the MCP server?",
+      "sessions": [
+        "2026-05-24-2018"
+      ]
+    },
+    {
+      "question": "Was the canonical summary for ideas-lab actually persisted to the MCP server after the prior session?",
+      "sessions": [
+        "2026-05-24-2018"
+      ]
+    },
+    {
+      "question": "Why was the IDeaS_Workspace directory not found during the automated weekly sync?",
+      "sessions": [
+        "2026-05-24-2018"
+      ]
     }
   ],
   "contributors": [
@@ -351,12 +536,23 @@
       "2026-05-24-1850",
       "2026-05-24-1851",
       "2026-05-24-1346-42c68c22",
-      "2026-05-23-1638-9f53e050"
+      "2026-05-23-1638-9f53e050",
+      "2026-05-24-2017",
+      "2026-05-24-2017",
+      "2026-05-24-2017",
+      "2026-05-24-2017",
+      "2026-05-24-2017",
+      "2026-05-24-2018",
+      "2026-05-24-2018",
+      "2026-05-24-2018",
+      "2026-05-24-2018",
+      "2026-05-24-2018"
     ],
     "mcp": [
       "2026-05-24-init",
       "2026-05-23-1638-1510da95",
-      "2026-05-23-1638-ab528c74"
+      "2026-05-23-1638-ab528c74",
+      "2026-05-24-2017"
     ],
     "hooks": [
       "2026-05-24-init",
@@ -369,7 +565,18 @@
       "2026-05-24-1834",
       "2026-05-24-1850",
       "2026-05-24-1851",
-      "2026-05-24-1346-42c68c22"
+      "2026-05-24-1346-42c68c22",
+      "2026-05-24-2017",
+      "2026-05-24-2017",
+      "2026-05-24-2017",
+      "2026-05-24-2017",
+      "2026-05-24-2017",
+      "2026-05-24-2018",
+      "2026-05-24-2018",
+      "2026-05-24-2018",
+      "2026-05-24-2018",
+      "2026-05-24-2018",
+      "2026-05-24-2018"
     ],
     "agentOS": [
       "2026-05-24-1834"
@@ -392,7 +599,8 @@
       "2026-05-24-1848"
     ],
     "eligibility-scoring": [
-      "2026-05-24-1848"
+      "2026-05-24-1848",
+      "2026-05-24-2017"
     ],
     "grant-strategy": [
       "2026-05-24-1848"
@@ -488,6 +696,81 @@
     ],
     "debugging": [
       "2026-05-23-1638-ab528c74"
+    ],
+    "queue-operation": [
+      "2026-05-24-2017",
+      "2026-05-24-2017",
+      "2026-05-24-2017",
+      "2026-05-24-2017",
+      "2026-05-24-2017",
+      "2026-05-24-2017",
+      "2026-05-24-2018",
+      "2026-05-24-2018",
+      "2026-05-24-2018",
+      "2026-05-24-2018",
+      "2026-05-24-2018",
+      "2026-05-24-2018"
+    ],
+    "canonical-summary": [
+      "2026-05-24-2017",
+      "2026-05-24-2017",
+      "2026-05-24-2017",
+      "2026-05-24-2017",
+      "2026-05-24-2018",
+      "2026-05-24-2018",
+      "2026-05-24-2018"
+    ],
+    "memory-maintenance": [
+      "2026-05-24-2017"
+    ],
+    "memory-extraction": [
+      "2026-05-24-2017",
+      "2026-05-24-2017",
+      "2026-05-24-2018",
+      "2026-05-24-2018"
+    ],
+    "recursive": [
+      "2026-05-24-2017",
+      "2026-05-24-2018",
+      "2026-05-24-2018",
+      "2026-05-24-2018"
+    ],
+    "rfp-tooling": [
+      "2026-05-24-2017",
+      "2026-05-24-2018"
+    ],
+    "behavioral-health": [
+      "2026-05-24-2017"
+    ],
+    "minnesota-dhs": [
+      "2026-05-24-2017"
+    ],
+    "design-phase": [
+      "2026-05-24-2017"
+    ],
+    "recursive-extraction": [
+      "2026-05-24-2017",
+      "2026-05-24-2018"
+    ],
+    "meta-session": [
+      "2026-05-24-2017",
+      "2026-05-24-2018"
+    ],
+    "ideas-lab": [
+      "2026-05-24-2018",
+      "2026-05-24-2018"
+    ],
+    "ideas-revenue-solutions": [
+      "2026-05-24-2018"
+    ],
+    "workspace-sync": [
+      "2026-05-24-2018"
+    ],
+    "memory-pipeline": [
+      "2026-05-24-2018"
+    ],
+    "automation": [
+      "2026-05-24-2018"
     ]
   }
 }

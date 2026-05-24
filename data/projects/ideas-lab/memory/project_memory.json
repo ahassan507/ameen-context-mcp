@@ -1,7 +1,7 @@
 {
   "project": "ideas-lab",
-  "last_updated": "2026-05-24T18:56:26Z",
-  "canonical_summary": "",
+  "last_updated": "2026-05-24T20:18:09Z",
+  "canonical_summary": "The ideas-lab project tracks Ameen's work as a Business Analytics Intern at IDeaS Revenue Solutions (IDeaS.Lab), organized in a sprint-based workspace at ~/Desktop/IDeaS_Workspace/ with weekly folders spanning from Week-01 (Feb 3) through at least Week-08 (Mar 24). An automated scheduled task called 'ideas-workspace-weekly-sync' runs weekly to scan and sync the workspace, but recent runs (May 4, May 15, May 19) have been largely non-functional \u2014 producing truncated transcripts, synthetic placeholder responses, or failing to locate the IDeaS_Workspace directory entirely. No meaningful automated sync output has been produced since the April 26 run, which successfully listed the workspace folder structure. The immediate issue is that the workspace directory appears to have moved or been removed from its expected Desktop location, breaking the weekly sync task.",
   "known_solutions": [
     {
       "problem": "Need to determine which week folder each IDeaS_Lab file belongs to based on modification date",

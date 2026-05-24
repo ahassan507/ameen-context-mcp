@@ -1,12 +1,18 @@
 #!/usr/bin/env python3
 """
-SessionStart hook: classify the current cwd to a project, load that project's
-memory, and emit a brief context block for Claude to read.
+SessionStart hook (v2): classify cwd to a project, load project memory,
+and emit a focused context block.
 
-Claude Code passes a JSON object on stdin like:
+v2 improvements over v1:
+  - Deduplicates open_threads before display
+  - Shows recent structured session summaries
+  - Surfaces playbooks if they exist
+  - Compact output — prioritises signal over noise
+
+Claude Code passes a JSON object on stdin:
   {"hook_event_name":"SessionStart","cwd":"/path","session_id":"...", ...}
 
-Anything we print to stdout becomes additionalContext for the session.
+Anything printed to stdout becomes additionalContext for the session.
 """
 
 import json
@@ -16,6 +22,11 @@ from pathlib import Path
 DATA_DIR = Path(__file__).resolve().parent.parent / "data"
 PROJECTS_DIR = DATA_DIR / "projects"
 REGISTRY_PATH = PROJECTS_DIR / "registry.json"
+
+PENDING_PLACEHOLDERS = {
+    "(auto-captured by SessionEnd hook; pending structuring)",
+    "(backfilled; pending structuring)",
+}
 
 
 def classify(cwd: str) -> tuple[str | None, int]:
@@ -38,40 +49,97 @@ def classify(cwd: str) -> tuple[str | None, int]:
     return None, 0
 
 
+def load_recent_sessions(project: str, limit: int = 3) -> list[dict]:
+    sessions_dir = PROJECTS_DIR / project / "sessions"
+    if not sessions_dir.exists():
+        return []
+    files = sorted(sessions_dir.glob("*.json"), reverse=True)
+    result = []
+    for p in files:
+        if len(result) >= limit:
+            break
+        try:
+            s = json.loads(p.read_text())
+            summary = s.get("summary", "")
+            if any(summary.startswith(ph) for ph in PENDING_PLACEHOLDERS):
+                continue
+            if summary:
+                result.append(s)
+        except Exception:
+            continue
+    return result
+
+
+def deduplicate_threads(threads: list[dict]) -> list[dict]:
+    seen: set[str] = set()
+    deduped = []
+    for t in threads:
+        q = t.get("question", "").strip()
+        key = q[:60].lower()
+        if key not in seen:
+            seen.add(key)
+            deduped.append(t)
+    return deduped
+
+
 def summarize_project(project: str) -> str:
     mem_path = PROJECTS_DIR / project / "memory" / "project_memory.json"
     if not mem_path.exists():
         return ""
-    with open(mem_path) as f:
-        mem = json.load(f)
+    mem = json.loads(mem_path.read_text())
 
     lines = [f"## Session Memory — project: {project}"]
+
     if mem.get("canonical_summary"):
         lines.append(f"Summary: {mem['canonical_summary']}")
     if mem.get("last_updated"):
         lines.append(f"Last updated: {mem['last_updated']}")
 
+    # Playbooks (v2)
+    playbooks = mem.get("playbooks", [])
+    if playbooks:
+        lines.append(f"\nEstablished patterns ({len(playbooks)}):")
+        for pb in playbooks[:3]:
+            lines.append(f"- [{pb['type']}] {pb['description'][:100]} (seen {pb['frequency']}x)")
+
+    # Known solutions
     solutions = mem.get("known_solutions", [])
     if solutions:
         lines.append(f"\nKnown solutions ({len(solutions)}):")
         for s in solutions[-5:]:
-            lines.append(f"- {s.get('problem','')} → {s.get('solution','')}")
+            lines.append(f"- {s.get('problem','')[:80]} → {s.get('solution','')[:80]}")
 
-    decisions = mem.get("decision_log", [])
+    # Decisions: show only confirmed/established, most recent
+    decisions = [
+        d for d in mem.get("decision_log", [])
+        if d.get("status") in ("confirmed", "established")
+    ]
     if decisions:
-        lines.append(f"\nRecent decisions ({len(decisions)}):")
+        lines.append(f"\nKey decisions ({len(decisions)} confirmed):")
         for d in decisions[-5:]:
-            lines.append(f"- [{d.get('status','?')}] {d.get('decision','')}")
+            status = d.get("status", "?")
+            badge = "✓✓" if status == "established" else "✓"
+            lines.append(f"- [{badge}] {d.get('decision','')[:100]}")
 
-    threads = mem.get("open_threads", [])
+    # Open threads (deduped)
+    threads = deduplicate_threads(mem.get("open_threads", []))
     if threads:
         lines.append(f"\nOpen threads ({len(threads)}):")
         for t in threads[-5:]:
-            lines.append(f"- {t.get('question','')}")
+            lines.append(f"- {t.get('question','')[:100]}")
+
+    # Recent session summaries (v2)
+    recent = load_recent_sessions(project, limit=3)
+    if recent:
+        lines.append(f"\nRecent sessions:")
+        for s in recent:
+            sid = s.get("session_id", "?")
+            summary = s.get("summary", "")[:120]
+            lines.append(f"- [{sid}] {summary}")
 
     if len(lines) == 1:
-        return ""  # nothing useful to inject
-    lines.append("\n(Loaded by AgentOS Session Memory hook.)")
+        return ""
+    lines.append("\n(Loaded by AgentOS SessionStart hook v2.)")
     return "\n".join(lines)
 
 
@@ -93,7 +161,6 @@ def main() -> int:
     if not summary:
         return 0
 
-    # Stdout becomes additionalContext per Claude Code hook spec
     print(summary)
     return 0
 

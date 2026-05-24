@@ -307,12 +307,17 @@ def context_save_session(
             "evidence_sessions": [session_id],
         })
 
-    # Append open threads
+    # Append open threads (dedup — skip if same question already recorded)
+    existing_q = {t.get("question", "").strip()[:60].lower()
+                  for t in memory.get("open_threads", [])}
     for q in session["open_questions"]:
-        memory.setdefault("open_threads", []).append({
-            "question": q,
-            "sessions": [session_id],
-        })
+        key = q.strip()[:60].lower()
+        if key not in existing_q:
+            memory.setdefault("open_threads", []).append({
+                "question": q,
+                "sessions": [session_id],
+            })
+            existing_q.add(key)
 
     # Contributors
     contributors = set(memory.get("contributors", []))
@@ -334,6 +339,95 @@ def context_save_session(
         "decisions_recorded": len(session["decisions"]),
         "open_questions_recorded": len(session["open_questions"]),
     }, indent=2)
+
+
+@mcp.tool()
+def context_get_recent_sessions(project: str, limit: int = 5) -> str:
+    """
+    Return the last N structured session summaries for a project.
+    Skips sessions that are still pending structuring.
+
+    Args:
+        project: project slug
+        limit: number of sessions to return (default 5)
+    """
+    sessions_dir = PROJECTS_DIR / project / "sessions"
+    if not sessions_dir.exists():
+        return json.dumps({"error": f"no sessions directory for '{project}'"})
+
+    pending = {
+        "(auto-captured by SessionEnd hook; pending structuring)",
+        "(backfilled; pending structuring)",
+    }
+    files = sorted(sessions_dir.glob("*.json"), reverse=True)
+    results = []
+    for p in files:
+        if len(results) >= limit:
+            break
+        try:
+            s = json.loads(p.read_text())
+            if s.get("summary", "") in pending:
+                continue
+            results.append({
+                "session_id": s.get("session_id"),
+                "timestamp": s.get("timestamp"),
+                "summary": s.get("summary", "")[:500],
+                "tags": s.get("tags", []),
+                "decisions": len(s.get("decisions", [])),
+                "open_questions": len(s.get("open_questions", [])),
+            })
+        except Exception:
+            continue
+
+    return json.dumps({"project": project, "count": len(results), "sessions": results}, indent=2)
+
+
+@mcp.tool()
+def context_resolve_thread(project: str, question_fragment: str) -> str:
+    """
+    Remove open threads whose question contains the given fragment (case-insensitive).
+    Use after a question has been answered or is no longer relevant.
+
+    Args:
+        project: project slug
+        question_fragment: substring to match against thread questions
+    """
+    mem = _load_project_memory(project)
+    if not mem:
+        return json.dumps({"error": f"no memory for '{project}'"})
+
+    fragment = question_fragment.lower()
+    before = mem.get("open_threads", [])
+    after = [t for t in before if fragment not in t.get("question", "").lower()]
+    removed = len(before) - len(after)
+
+    if removed == 0:
+        return json.dumps({"removed": 0, "message": "No matching threads found."})
+
+    mem["open_threads"] = after
+    mem["last_updated"] = datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%SZ")
+    _write_project_memory(project, mem)
+    return json.dumps({"removed": removed, "remaining": len(after)}, indent=2)
+
+
+@mcp.tool()
+def context_update_canonical_summary(project: str, summary: str) -> str:
+    """
+    Overwrite the canonical_summary for a project.
+    Use after a synthesis pass or when you have a better summary to save.
+
+    Args:
+        project: project slug
+        summary: new canonical summary text
+    """
+    mem = _load_project_memory(project)
+    if not mem:
+        return json.dumps({"error": f"no memory for '{project}'"})
+
+    mem["canonical_summary"] = summary
+    mem["last_updated"] = datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%SZ")
+    _write_project_memory(project, mem)
+    return json.dumps({"updated": True, "project": project, "summary_length": len(summary)})
 
 
 if __name__ == "__main__":
