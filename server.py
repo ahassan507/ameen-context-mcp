@@ -5,7 +5,7 @@ Reads from data/ files as source of truth. GitHub-backed.
 
 import json
 import os
-from datetime import datetime
+from datetime import datetime, timezone
 from pathlib import Path
 
 from mcp.server.fastmcp import FastMCP
@@ -261,7 +261,7 @@ def context_save_session(
         author: defaults to "Ameen Hassan".
     """
     _ensure_project(project)
-    now = datetime.utcnow()
+    now = datetime.now(timezone.utc)
     session_id = now.strftime("%Y-%m-%d-%H%M")
     timestamp = now.strftime("%Y-%m-%dT%H:%M:%SZ")
 
@@ -408,7 +408,7 @@ def context_resolve_thread(project: str, question_fragment: str) -> str:
         return json.dumps({"removed": 0, "message": "No matching threads found."})
 
     mem["open_threads"] = after
-    mem["last_updated"] = datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%SZ")
+    mem["last_updated"] = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
     _write_project_memory(project, mem)
     return json.dumps({"removed": removed, "remaining": len(after)}, indent=2)
 
@@ -428,9 +428,141 @@ def context_update_canonical_summary(project: str, summary: str) -> str:
         return json.dumps({"error": f"no memory for '{project}'"})
 
     mem["canonical_summary"] = summary
-    mem["last_updated"] = datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%SZ")
+    mem["last_updated"] = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
     _write_project_memory(project, mem)
     return json.dumps({"updated": True, "project": project, "summary_length": len(summary)})
+
+
+# ---------------------------------------------------------------------------
+# Mid-session memory tools (v3-A) — call these proactively during a session
+# ---------------------------------------------------------------------------
+
+
+@mcp.tool()
+def context_flag_decision(
+    project: str,
+    decision: str,
+    status: str = "confirmed",
+) -> str:
+    """
+    Immediately record a decision to project memory mid-session.
+    Call this the moment a significant decision is made or confirmed — don't wait
+    for session end.
+
+    Args:
+        project: project slug (shown in SessionStart context block)
+        decision: what was decided, in one clear sentence
+        status: "confirmed" | "tentative" | "reversed"
+    """
+    mem = _load_project_memory(project)
+    if not mem:
+        return json.dumps({"error": f"no memory for '{project}'"})
+
+    valid_statuses = {"confirmed", "tentative", "reversed"}
+    if status not in valid_statuses:
+        return json.dumps({"error": f"status must be one of: {sorted(valid_statuses)}"})
+
+    # Dedup: skip if same decision (first 60 chars, normalised) already in log
+    key = decision.strip()[:60].lower()
+    existing_keys = {
+        d.get("decision", "").strip()[:60].lower()
+        for d in mem.get("decision_log", [])
+    }
+    if key in existing_keys:
+        return json.dumps({"saved": False, "duplicate": True,
+                           "message": "Decision already recorded."})
+
+    timestamp = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+    mem.setdefault("decision_log", []).append({
+        "decision": decision.strip(),
+        "status": status,
+        "recorded_at": timestamp,
+        "source": "mid-session",
+    })
+    mem["last_updated"] = timestamp
+    _write_project_memory(project, mem)
+
+    return json.dumps({
+        "saved": True,
+        "project": project,
+        "decision": decision.strip(),
+        "status": status,
+    })
+
+
+@mcp.tool()
+def context_flag_blocker(project: str, question: str) -> str:
+    """
+    Immediately record an open question or blocker to project memory mid-session.
+    Call this when an unresolved question is identified that should persist beyond
+    this session.
+
+    Args:
+        project: project slug (shown in SessionStart context block)
+        question: the unresolved question or blocker, in one clear sentence
+    """
+    mem = _load_project_memory(project)
+    if not mem:
+        return json.dumps({"error": f"no memory for '{project}'"})
+
+    # Dedup: skip if same question (60-char prefix) already in open_threads
+    key = question.strip()[:60].lower()
+    existing_keys = {
+        t.get("question", "").strip()[:60].lower()
+        for t in mem.get("open_threads", [])
+    }
+    if key in existing_keys:
+        return json.dumps({"saved": False, "duplicate": True,
+                           "message": "Blocker already recorded."})
+
+    timestamp = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+    mem.setdefault("open_threads", []).append({
+        "question": question.strip(),
+        "recorded_at": timestamp,
+        "source": "mid-session",
+    })
+    mem["last_updated"] = timestamp
+    _write_project_memory(project, mem)
+
+    return json.dumps({
+        "saved": True,
+        "project": project,
+        "question": question.strip(),
+    })
+
+
+@mcp.tool()
+def context_note_solution(project: str, problem: str, solution: str) -> str:
+    """
+    Immediately record a problem→solution pair to project memory mid-session.
+    Call this when a problem is solved or a working approach is confirmed so it's
+    available in future sessions without re-deriving it.
+
+    Args:
+        project: project slug (shown in SessionStart context block)
+        problem: the problem that was solved, in one clear sentence
+        solution: how it was solved or what worked
+    """
+    mem = _load_project_memory(project)
+    if not mem:
+        return json.dumps({"error": f"no memory for '{project}'"})
+
+    timestamp = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+    mem.setdefault("known_solutions", []).append({
+        "problem": problem.strip(),
+        "solution": solution.strip(),
+        "recorded_at": timestamp,
+        "source": "mid-session",
+    })
+    mem["last_updated"] = timestamp
+    _write_project_memory(project, mem)
+
+    return json.dumps({
+        "saved": True,
+        "project": project,
+        "problem": problem.strip(),
+        "solution": solution.strip(),
+    })
 
 
 if __name__ == "__main__":

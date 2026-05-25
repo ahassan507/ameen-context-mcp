@@ -139,7 +139,17 @@ def summarize_project(project: str) -> str:
 
     if len(lines) == 1:
         return ""
-    lines.append("\n(Loaded by AgentOS SessionStart hook v2.)")
+
+    # v3-A: mid-session tool instructions — project slug pre-filled so there's
+    # zero friction. Claude should call these proactively, not just at session end.
+    lines.append(f"""
+Mid-session memory tools — call these proactively (project="{project}"):
+- context_flag_decision("{project}", "decision text", "confirmed|tentative|reversed") → a decision is made
+- context_flag_blocker("{project}", "question text") → an open question / blocker is identified
+- context_note_solution("{project}", "problem", "solution") → a problem is solved or approach confirmed
+These write directly to project memory — don't wait for session end.""")
+
+    lines.append("\n(Loaded by AgentOS SessionStart hook v3.)")
     return "\n".join(lines)
 
 
