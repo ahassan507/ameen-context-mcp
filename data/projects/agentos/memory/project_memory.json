@@ -1,6 +1,6 @@
 {
   "project": "agentos",
-  "last_updated": "2026-05-25T19:27:04Z",
+  "last_updated": "2026-05-25T19:30:48Z",
   "canonical_summary": "AgentOS (also called 'the vault') is a personal session memory layer built on top of the ameen-context MCP server, designed so every Claude Code session auto-loads relevant project context at startup and auto-saves findings at close. The core infrastructure is complete: SessionStart and SessionEnd hooks, a `context_save_session` MCP tool, a v1 keyword+cwd-based project classifier, a backfill pipeline for processing historical session transcripts, and a fingerprint guard in session_end.py to block recursive meta-session processing. A major data cleanup pass on 2026-05-25 removed 2,233 garbage sessions and 2,631 stale queue entries, preserving 19 valid pending entries and re-running synthesize_memory.py to rebuild clean project memory from scratch; the MCP server is registered globally and confirmed active. A project registry at data/projects/registry.json tracks 7 registered projects (agentos, rfp-project, rfp_intelligence_pro, RFP_Atharii, and others), with an agent map organized per project with role descriptions in table format; agentos is the infrastructure layer whose agents run across all other projects. A 21/21 test suite confirmed correct registry structure, including that 'vault' and 'vault setup' keywords correctly map to agentos, and that the Workshop_1_Files directory falls back to agentos as the default project \u2014 the 'vault' reference in that directory was identified as an Obsidian vault for Building Bridges Workshop 1 materials, not a separate AgentOS project. Next priorities are validating the 19 remaining queue entries in the next synthesis pass and confirming end-to-end hook registration stability via install_hooks.sh.",
   "known_solutions": [
     {
@@ -226,6 +226,34 @@
       "evidence_sessions": [
         "2026-05-25-192622"
       ]
+    },
+    {
+      "problem": "No memory or context found for a 'vault setup' project in the AgentOS memory system",
+      "solution": "Memory search for 'vault setup' returned 0 results",
+      "evidence_sessions": [
+        "2026-05-25-193002"
+      ]
+    },
+    {
+      "problem": "No grant submission records exist in the AgentOS memory system",
+      "solution": "context_search_memories returned 0 results for 'grant submitted'",
+      "evidence_sessions": [
+        "2026-05-25-192958"
+      ]
+    },
+    {
+      "problem": "No memory or context found for a 'vault setup' project in the AgentOS memory system",
+      "solution": "Local memory directory read failed with exit code 1",
+      "evidence_sessions": [
+        "2026-05-25-193003"
+      ]
+    },
+    {
+      "problem": "No prior comprehensive agent map existed across all AgentOS projects",
+      "solution": "Registry.json found at /Users/ameenhassan/Desktop/Tech & Coding/Coding_projects/ameen-context-mcp/data/projects/registry.json",
+      "evidence_sessions": [
+        "2026-05-25-193005"
+      ]
     }
   ],
   "decision_log": [
@@ -420,14 +448,14 @@
     },
     {
       "decision": "agentos is the infrastructure layer whose agents run across all other projects",
-      "status": "confirmed",
+      "status": "established",
       "evidence_sessions": [
         "2026-05-25-182421"
       ]
     },
     {
       "decision": "Agent map should be organized per project with role descriptions in table format",
-      "status": "confirmed",
+      "status": "established",
       "evidence_sessions": [
         "2026-05-25-182421"
       ]
@@ -444,6 +472,20 @@
       "status": "confirmed",
       "evidence_sessions": [
         "2026-05-25-190814"
+      ]
+    },
+    {
+      "decision": "Agent map should be organized per project with role descriptions in table format",
+      "status": "established",
+      "evidence_sessions": [
+        "2026-05-25-193005"
+      ]
+    },
+    {
+      "decision": "agentos is the infrastructure layer whose agents run across all other projects",
+      "status": "established",
+      "evidence_sessions": [
+        "2026-05-25-193005"
       ]
     }
   ],
@@ -807,6 +849,60 @@
       "sessions": [
         "2026-05-25-192622"
       ]
+    },
+    {
+      "question": "What is the 'vault setup project' the user is referring to?",
+      "sessions": [
+        "2026-05-25-193002"
+      ]
+    },
+    {
+      "question": "Is the vault setup project related to an existing project such as AgentOS, rfp-project, or Rooted Wellness?",
+      "sessions": [
+        "2026-05-25-193002"
+      ]
+    },
+    {
+      "question": "Which specific grant did the user most recently submit, and when?",
+      "sessions": [
+        "2026-05-25-192958"
+      ]
+    },
+    {
+      "question": "Has any grant (Uplift OERAC, Bridge CEMIG, PTR MAT, Rooted Wellness 245G) actually been submitted or are all still in development?",
+      "sessions": [
+        "2026-05-25-192958"
+      ]
+    },
+    {
+      "question": "Should grant submission events be explicitly captured in AgentOS project memory going forward?",
+      "sessions": [
+        "2026-05-25-192958"
+      ]
+    },
+    {
+      "question": "What is 'the vault setup' the user is referring to?",
+      "sessions": [
+        "2026-05-25-193003"
+      ]
+    },
+    {
+      "question": "Which specific agents in the map need to be built vs. already exist?",
+      "sessions": [
+        "2026-05-25-193005"
+      ]
+    },
+    {
+      "question": "What is the priority order for implementing agents across the 7 projects?",
+      "sessions": [
+        "2026-05-25-193005"
+      ]
+    },
+    {
+      "question": "Are there agents needed for the behavioral health / grant work projects not yet in the registry?",
+      "sessions": [
+        "2026-05-25-193005"
+      ]
     }
   ],
   "contributors": [
@@ -836,7 +932,11 @@
       "2026-05-25-190813",
       "2026-05-25-190814",
       "2026-05-25-192625",
-      "2026-05-25-192622"
+      "2026-05-25-192622",
+      "2026-05-25-193002",
+      "2026-05-25-192958",
+      "2026-05-25-193003",
+      "2026-05-25-193005"
     ],
     "mcp": [
       "2026-05-24-init",
@@ -871,7 +971,8 @@
       "2026-05-25-172600",
       "2026-05-25-182421",
       "2026-05-25-190814",
-      "2026-05-25-192622"
+      "2026-05-25-192622",
+      "2026-05-25-193005"
     ],
     "agentOS": [
       "2026-05-24-1834"
@@ -930,7 +1031,8 @@
     ],
     "project-registry": [
       "2026-05-24-1346-42c68c22",
-      "2026-05-25-182421"
+      "2026-05-25-182421",
+      "2026-05-25-193005"
     ],
     "jsonl": [
       "2026-05-24-1346-42c68c22"
@@ -1044,7 +1146,8 @@
       "2026-05-25-182421"
     ],
     "behavioral-health": [
-      "2026-05-24-2017"
+      "2026-05-24-2017",
+      "2026-05-25-192958"
     ],
     "minnesota-dhs": [
       "2026-05-24-2017"
@@ -1119,10 +1222,12 @@
       "2026-05-25-182419"
     ],
     "agent-map": [
-      "2026-05-25-182421"
+      "2026-05-25-182421",
+      "2026-05-25-193005"
     ],
     "agent-design": [
-      "2026-05-25-182421"
+      "2026-05-25-182421",
+      "2026-05-25-193005"
     ],
     "vault": [
       "2026-05-25-190813",
@@ -1131,11 +1236,13 @@
       "2026-05-25-192625"
     ],
     "memory-lookup": [
-      "2026-05-25-190813"
+      "2026-05-25-190813",
+      "2026-05-25-192958"
     ],
     "missing-context": [
       "2026-05-25-190813",
-      "2026-05-25-190813"
+      "2026-05-25-190813",
+      "2026-05-25-193002"
     ],
     "clarification-needed": [
       "2026-05-25-190813",
@@ -1145,10 +1252,13 @@
       "2026-05-25-190813",
       "2026-05-25-190813",
       "2026-05-25-190814",
-      "2026-05-25-192625"
+      "2026-05-25-192625",
+      "2026-05-25-193002",
+      "2026-05-25-193003"
     ],
     "context-missing": [
-      "2026-05-25-190813"
+      "2026-05-25-190813",
+      "2026-05-25-193003"
     ],
     "session-queue": [
       "2026-05-25-190813"
@@ -1166,7 +1276,9 @@
       "2026-05-25-190814"
     ],
     "vault-setup": [
-      "2026-05-25-190814"
+      "2026-05-25-190814",
+      "2026-05-25-193002",
+      "2026-05-25-193003"
     ],
     "hook-registration": [
       "2026-05-25-190814"
@@ -1182,6 +1294,39 @@
     ],
     "project-memory-retrieval": [
       "2026-05-25-192622"
+    ],
+    "project-clarification": [
+      "2026-05-25-193002"
+    ],
+    "grant-work": [
+      "2026-05-25-192958"
+    ],
+    "rfp-project": [
+      "2026-05-25-192958",
+      "2026-05-25-193005"
+    ],
+    "oerac": [
+      "2026-05-25-192958"
+    ],
+    "no-results": [
+      "2026-05-25-192958"
+    ],
+    "workshop-1-files": [
+      "2026-05-25-193003"
+    ],
+    "infrastructure": [
+      "2026-05-25-193005"
     ]
-  }
+  },
+  "playbooks": [
+    {
+      "type": "recurring_problem",
+      "description": "No memory or context found for a 'vault setup' project in the AgentOS memory system",
+      "frequency": 2,
+      "sessions": [
+        "2026-05-25-193003",
+        "2026-05-25-193002"
+      ]
+    }
+  ]
 }

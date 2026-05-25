@@ -1,7 +1,7 @@
 {
   "project": "ideas-lab",
-  "last_updated": "2026-05-25T19:27:29Z",
-  "canonical_summary": "The ideas-lab project tracks Ameen's work as a Business Analytics Intern at IDeaS Revenue Solutions (IDeaS.Lab), organized in a sprint-based workspace with weekly folders spanning Week-01 (Feb 3) through at least Week-08 (Mar 24), originally located at ~/Desktop/IDeaS_Workspace/. An automated scheduled task called 'ideas-workspace-weekly-sync' was configured to scan and summarize weekly workspace activity, and last produced real output on April 26, 2026. Every subsequent automated run \u2014 on May 4, May 15, and May 19 \u2014 has failed: the May 4 run produced a synthetic placeholder with zero token usage, the May 15 transcript was severely truncated, and the May 19 run could not locate the IDeaS_Workspace directory at all, indicating the workspace has moved or been removed from its expected Desktop location. A separate session on May 25 addressed a GitHub repository (data-qualification-agent under ahassan507) that had accumulated 360 health check report files in its commit history; the decision was made to replace it with a clean single-commit repo with no prior history and keep it private going forward. The root cause of the sync failures \u2014 a broken directory path unresolved for over four weeks \u2014 remains the primary open blocker. Immediate next steps are to manually locate the current IDeaS_Workspace directory, update the sync task's path configuration, and run a validation scan before the next scheduled execution.",
+  "last_updated": "2026-05-25T19:31:09Z",
+  "canonical_summary": "The ideas-lab project tracks Ameen's work as a Business Analytics Intern at IDeaS Revenue Solutions (IDeaS.Lab), organized in a sprint-based workspace with weekly folders spanning Week-01 (Feb 3) through at least Week-08 (Mar 24), originally located at ~/Desktop/IDeaS_Workspace/. An automated scheduled task called 'ideas-workspace-weekly-sync' was configured to scan and summarize weekly workspace activity, but has failed on every run since April 26, 2026 \u2014 the May 4 run produced a synthetic placeholder, the May 15 transcript was severely truncated, and the May 19 run could not locate the IDeaS_Workspace directory at all, indicating the workspace has moved or been removed from its expected Desktop location. A separate effort on May 25 cleaned up a GitHub repository called data-qualification-agent (under ahassan507) that had accumulated 360 health check report files in its commit history; the decision was made to replace it with a clean single-commit repo with no prior history and keep it private. The root cause of the sync failures \u2014 a broken directory path unresolved for over four weeks \u2014 remains the primary open blocker, and the immediate next steps are to manually locate the current IDeaS_Workspace directory, update the sync task's path configuration, and run a validation scan before the next scheduled execution.",
   "known_solutions": [
     {
       "problem": "Need to determine which week folder each IDeaS_Lab file belongs to based on modification date",
@@ -30,6 +30,13 @@
       "evidence_sessions": [
         "2026-05-25-190813"
       ]
+    },
+    {
+      "problem": "The data-qualification-agent repo had been pushed to GitHub with history that the user did not want exposed",
+      "solution": "Report files (360chi_health_check_report.docx/html/json/md) confirmed still on disk after git rm --cached",
+      "evidence_sessions": [
+        "2026-05-25-193000"
+      ]
     }
   ],
   "decision_log": [
@@ -42,9 +49,23 @@
     },
     {
       "decision": "Keep the repo private going forward",
-      "status": "confirmed",
+      "status": "established",
       "evidence_sessions": [
         "2026-05-25-190813"
+      ]
+    },
+    {
+      "decision": "Replace existing repo with a fresh repo that has no prior git history",
+      "status": "confirmed",
+      "evidence_sessions": [
+        "2026-05-25-193000"
+      ]
+    },
+    {
+      "decision": "Keep the repo private going forward",
+      "status": "established",
+      "evidence_sessions": [
+        "2026-05-25-193000"
       ]
     }
   ],
@@ -132,6 +153,24 @@
       "sessions": [
         "2026-05-25-190813"
       ]
+    },
+    {
+      "question": "Was the fresh repo successfully pushed to GitHub after the history strip?",
+      "sessions": [
+        "2026-05-25-193000"
+      ]
+    },
+    {
+      "question": "Was .claude/settings.local.json properly excluded before the clean commit was made?",
+      "sessions": [
+        "2026-05-25-193000"
+      ]
+    },
+    {
+      "question": "Are there other sensitive files in the staged set that should be excluded?",
+      "sessions": [
+        "2026-05-25-193000"
+      ]
     }
   ],
   "contributors": [],
@@ -156,7 +195,8 @@
     "ideas-lab": [
       "2026-04-26-2045-b1626b0d",
       "2026-05-15-1606-36558f51",
-      "2026-05-19-1747-c8f48609"
+      "2026-05-19-1747-c8f48609",
+      "2026-05-25-193000"
     ],
     "workspace-sync": [
       "2026-04-26-2045-b1626b0d",
@@ -181,25 +221,33 @@
       "2026-05-19-1747-c8f48609"
     ],
     "github": [
-      "2026-05-25-190813"
+      "2026-05-25-190813",
+      "2026-05-25-193000"
     ],
     "git-history": [
-      "2026-05-25-190813"
+      "2026-05-25-190813",
+      "2026-05-25-193000"
     ],
     "data-qualification-agent": [
-      "2026-05-25-190813"
+      "2026-05-25-190813",
+      "2026-05-25-193000"
     ],
     "sensitive-files": [
-      "2026-05-25-190813"
+      "2026-05-25-190813",
+      "2026-05-25-193000"
     ],
     "repo-cleanup": [
-      "2026-05-25-190813"
+      "2026-05-25-190813",
+      "2026-05-25-193000"
     ],
     "ideas-internship": [
       "2026-05-25-190813"
     ],
     "360chi": [
       "2026-05-25-190813"
+    ],
+    "privacy": [
+      "2026-05-25-193000"
     ]
   }
 }
