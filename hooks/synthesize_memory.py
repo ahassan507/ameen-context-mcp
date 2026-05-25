@@ -225,6 +225,52 @@ def refresh_canonical_summary(project: str, memory: dict, sessions: list[dict]) 
     return None
 
 
+_VALID_STATUSES = {"confirmed", "tentative", "reversed", "established"}
+
+
+def _validate_memory(mem: dict) -> list[str]:
+    """
+    QA gate — run before writing project_memory.json.
+    Returns a list of error strings. Empty list = pass.
+    """
+    errors = []
+
+    # canonical_summary: if present must be non-empty and not a placeholder
+    summary = mem.get("canonical_summary", "")
+    if summary and len(summary.strip()) < 20:
+        errors.append(f"canonical_summary too short ({len(summary.strip())} chars)")
+
+    # decision_log: each entry needs non-empty decision + valid status
+    for i, d in enumerate(mem.get("decision_log", [])):
+        if not isinstance(d, dict):
+            errors.append(f"decision_log[{i}] is not a dict")
+            continue
+        if not d.get("decision", "").strip():
+            errors.append(f"decision_log[{i}].decision is empty")
+        if d.get("status") not in _VALID_STATUSES:
+            errors.append(f"decision_log[{i}].status invalid: {d.get('status')!r}")
+
+    # open_threads: each entry needs non-empty question
+    for i, t in enumerate(mem.get("open_threads", [])):
+        if not isinstance(t, dict):
+            errors.append(f"open_threads[{i}] is not a dict")
+            continue
+        if not t.get("question", "").strip():
+            errors.append(f"open_threads[{i}].question is empty")
+
+    # known_solutions: each needs non-empty problem + solution
+    for i, s in enumerate(mem.get("known_solutions", [])):
+        if not isinstance(s, dict):
+            errors.append(f"known_solutions[{i}] is not a dict")
+            continue
+        if not s.get("problem", "").strip():
+            errors.append(f"known_solutions[{i}].problem is empty")
+        if not s.get("solution", "").strip():
+            errors.append(f"known_solutions[{i}].solution is empty")
+
+    return errors
+
+
 def synthesize_project(project: str, summary_only: bool = False) -> bool:
     mem_path = PROJECTS_DIR / project / "memory" / "project_memory.json"
     if not mem_path.exists():
@@ -276,10 +322,20 @@ def synthesize_project(project: str, summary_only: bool = False) -> bool:
         print(f"    summary: claude CLI unavailable, keeping existing")
 
     if changed:
+        # QA gate — validate before writing
+        qa_errors = _validate_memory(memory)
+        if qa_errors:
+            for err in qa_errors:
+                print(f"    QA FAIL: {err}")
+                log(f"QA FAIL {project}: {err}")
+            print(f"    ✗ QA rejected — {len(qa_errors)} error(s), memory NOT written")
+            log(f"QA rejected {project} memory ({len(qa_errors)} errors)")
+            return False
+
         memory["last_updated"] = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
         with open(mem_path, "w") as f:
             json.dump(memory, f, indent=2)
-        print(f"    ✓ written")
+        print(f"    ✓ QA passed — written")
 
     return changed
 

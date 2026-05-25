@@ -437,6 +437,17 @@ def context_update_canonical_summary(project: str, summary: str) -> str:
 # Mid-session memory tools (v3-A) — call these proactively during a session
 # ---------------------------------------------------------------------------
 
+_MIN_TEXT_LEN = 10  # minimum chars for any decision / question / problem / solution
+
+
+def _validate_text(field: str, value: str) -> str | None:
+    """Return an error string if value fails QA, else None."""
+    if not value or not value.strip():
+        return f"{field} cannot be empty"
+    if len(value.strip()) < _MIN_TEXT_LEN:
+        return f"{field} too short ({len(value.strip())} chars, min {_MIN_TEXT_LEN})"
+    return None
+
 
 @mcp.tool()
 def context_flag_decision(
@@ -454,6 +465,10 @@ def context_flag_decision(
         decision: what was decided, in one clear sentence
         status: "confirmed" | "tentative" | "reversed"
     """
+    err = _validate_text("decision", decision)
+    if err:
+        return json.dumps({"error": err})
+
     mem = _load_project_memory(project)
     if not mem:
         return json.dumps({"error": f"no memory for '{project}'"})
@@ -501,6 +516,10 @@ def context_flag_blocker(project: str, question: str) -> str:
         project: project slug (shown in SessionStart context block)
         question: the unresolved question or blocker, in one clear sentence
     """
+    err = _validate_text("question", question)
+    if err:
+        return json.dumps({"error": err})
+
     mem = _load_project_memory(project)
     if not mem:
         return json.dumps({"error": f"no memory for '{project}'"})
@@ -543,6 +562,11 @@ def context_note_solution(project: str, problem: str, solution: str) -> str:
         problem: the problem that was solved, in one clear sentence
         solution: how it was solved or what worked
     """
+    for field, value in (("problem", problem), ("solution", solution)):
+        err = _validate_text(field, value)
+        if err:
+            return json.dumps({"error": err})
+
     mem = _load_project_memory(project)
     if not mem:
         return json.dumps({"error": f"no memory for '{project}'"})

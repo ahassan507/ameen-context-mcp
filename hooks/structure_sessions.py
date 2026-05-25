@@ -90,6 +90,47 @@ def _maybe_trigger_synthesis() -> None:
         log(f"_maybe_trigger_synthesis error: {e}")
 
 
+VALID_STATUSES = {"confirmed", "tentative", "reversed"}
+PENDING_PLACEHOLDERS = {
+    "(auto-captured by SessionEnd hook; pending structuring)",
+    "(backfilled; pending structuring)",
+}
+
+
+def _validate_structured(data: dict) -> list[str]:
+    """
+    QA gate — run before writing any structured session to disk.
+    Returns a list of error strings. Empty list = pass.
+    """
+    errors = []
+
+    # summary: required, non-empty, not a placeholder, min 50 chars
+    summary = data.get("summary", "")
+    if not summary:
+        errors.append("summary is missing or empty")
+    elif any(summary.startswith(ph) for ph in PENDING_PLACEHOLDERS):
+        errors.append(f"summary is still a placeholder: {summary[:60]}")
+    elif len(summary.strip()) < 50:
+        errors.append(f"summary too short ({len(summary.strip())} chars, min 50)")
+
+    # list fields: must be lists
+    for field in ("problems", "approaches", "results", "open_questions", "tags"):
+        if not isinstance(data.get(field, []), list):
+            errors.append(f"{field} must be a list, got {type(data.get(field))}")
+
+    # decisions: each must have decision (str, non-empty) + valid status
+    for i, d in enumerate(data.get("decisions", [])):
+        if not isinstance(d, dict):
+            errors.append(f"decisions[{i}] is not a dict")
+            continue
+        if not d.get("decision", "").strip():
+            errors.append(f"decisions[{i}].decision is empty")
+        if d.get("status") not in VALID_STATUSES:
+            errors.append(f"decisions[{i}].status invalid: {d.get('status')!r} (must be confirmed/tentative/reversed)")
+
+    return errors
+
+
 def extract_structure(excerpt: str) -> dict | None:
     if not excerpt or len(excerpt.strip()) < 100:
         return None
@@ -145,6 +186,14 @@ def structure_file(session_path: Path) -> bool:
     structured = extract_structure(excerpt)
     if not structured:
         log(f"failed to structure {session_path.name}")
+        return False
+
+    # QA gate — validate before writing
+    qa_errors = _validate_structured(structured)
+    if qa_errors:
+        for err in qa_errors:
+            log(f"QA FAIL {session_path.name}: {err}")
+        log(f"QA rejected {session_path.name} ({len(qa_errors)} errors) — not written")
         return False
 
     # Update session with structured fields
