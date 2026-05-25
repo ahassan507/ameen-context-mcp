@@ -104,17 +104,19 @@ def build_playbooks(sessions: list[dict]) -> list[dict]:
 
     for s in sessions:
         sid = s.get("session_id", "?")
-        for p in s.get("problems", []):
-            # normalize: lowercase, strip punctuation for grouping
-            key = re.sub(r"[^a-z0-9 ]", "", p.lower())[:80]
+        # Use sets per session to avoid counting within-session duplicates
+        session_problems = {re.sub(r"[^a-z0-9 ]", "", p.lower())[:80]
+                            for p in s.get("problems", [])}
+        session_approaches = {re.sub(r"[^a-z0-9 ]", "", a.lower())[:80]
+                              for a in s.get("approaches", [])}
+        for key in session_problems:
             problem_sessions[key].append(sid)
-        for a in s.get("approaches", []):
-            key = re.sub(r"[^a-z0-9 ]", "", a.lower())[:80]
+        for key in session_approaches:
             approach_sessions[key].append(sid)
 
     playbooks = []
 
-    # Problems seen 2+ times
+    # Problems seen in 2+ distinct sessions
     for key, sids in problem_sessions.items():
         if len(sids) >= 2:
             # Find the original (un-normalized) text
@@ -133,7 +135,7 @@ def build_playbooks(sessions: list[dict]) -> list[dict]:
                 "sessions": list(set(sids)),
             })
 
-    # Approaches seen 2+ times
+    # Approaches seen in 2+ distinct sessions
     for key, sids in approach_sessions.items():
         if len(sids) >= 2:
             original = ""
@@ -280,6 +282,9 @@ def main():
     target_project = None
     if "--project" in args:
         idx = args.index("--project")
+        if idx + 1 >= len(args):
+            print("Error: --project requires a project name argument.")
+            sys.exit(1)
         target_project = args[idx + 1]
 
     if target_project:

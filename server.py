@@ -366,7 +366,7 @@ def context_get_recent_sessions(project: str, limit: int = 5) -> str:
             break
         try:
             s = json.loads(p.read_text())
-            if s.get("summary", "") in pending:
+            if any(s.get("summary", "").startswith(ph) for ph in pending):
                 continue
             results.append({
                 "session_id": s.get("session_id"),
@@ -396,7 +396,10 @@ def context_resolve_thread(project: str, question_fragment: str) -> str:
     if not mem:
         return json.dumps({"error": f"no memory for '{project}'"})
 
-    fragment = question_fragment.lower()
+    if not question_fragment.strip():
+        return json.dumps({"error": "question_fragment cannot be empty — would delete all threads."})
+
+    fragment = question_fragment.strip().lower()
     before = mem.get("open_threads", [])
     after = [t for t in before if fragment not in t.get("question", "").lower()]
     removed = len(before) - len(after)

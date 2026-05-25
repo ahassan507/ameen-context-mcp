@@ -1,7 +1,7 @@
 {
   "project": "agentos",
-  "last_updated": "2026-05-24T20:18:50Z",
-  "canonical_summary": "AgentOS is a personal session memory layer built on top of the ameen-context MCP server, designed so every Claude Code session auto-loads relevant project context at startup and auto-saves findings at close. The core infrastructure is complete: SessionStart and SessionEnd hooks, a `context_save_session` MCP tool, a v1 keyword+cwd-based project classifier, and a backfill pipeline for processing 15 historical session transcripts through the structured memory system. Hook registration via direct agent modification of `~/.claude/settings.json` is blocked by Claude Code's auto-mode guardrails, so `install_hooks.sh` is the designated delivery mechanism for wiring hooks globally \u2014 the SessionStart hook is confirmed functional and loading context at session open. The MCP server is registered via `claude mcp add ameen-context -s user python3 ...` and responding to tool calls, though open questions remain about reliability of `claude mcp list` visibility across sessions. Next priorities are validating backfill pipeline output quality against the 15 historical transcripts, confirming hook registration stability end-to-end via install_hooks.sh, and deferring LLM-based session classification to a v2 pass once v1 is stable.",
+  "last_updated": "2026-05-25T17:10:01Z",
+  "canonical_summary": "AgentOS is a personal session memory layer built on top of the ameen-context MCP server, designed so every Claude Code session auto-loads relevant project context at startup and auto-saves findings at close. The core infrastructure is complete: SessionStart and SessionEnd hooks, a `context_save_session` MCP tool, a v1 keyword+cwd-based project classifier, and a backfill pipeline for processing 15 historical session transcripts through the structured memory system. Hook registration via direct agent modification of `~/.claude/settings.json` is blocked by Claude Code's auto-mode guardrails, so `install_hooks.sh` is the designated delivery mechanism for wiring hooks globally \u2014 the SessionStart hook is confirmed functional and loading context at session open. The MCP server is registered via `claude mcp add ameen-context -s user python3 ...` and responding to tool calls; recent sessions have been primarily minimal SessionEnd memory extraction passes, confirming the hooks are firing but producing little new substantive content. Next priorities are validating backfill pipeline output quality against the 15 historical transcripts, confirming end-to-end hook registration stability via install_hooks.sh, and deferring LLM-based session classification to a v2 pass once v1 is stable.",
   "known_solutions": [
     {
       "problem": "Memory Vault repo design only activates inside its own directory \u2014 not a global layer.",
@@ -516,12 +516,6 @@
     },
     {
       "question": "Was the canonical summary for ideas-lab actually persisted to the MCP server after the prior session?",
-      "sessions": [
-        "2026-05-24-2018"
-      ]
-    },
-    {
-      "question": "Why was the IDeaS_Workspace directory not found during the automated weekly sync?",
       "sessions": [
         "2026-05-24-2018"
       ]

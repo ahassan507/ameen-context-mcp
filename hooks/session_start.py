@@ -100,7 +100,7 @@ def summarize_project(project: str) -> str:
     if playbooks:
         lines.append(f"\nEstablished patterns ({len(playbooks)}):")
         for pb in playbooks[:3]:
-            lines.append(f"- [{pb['type']}] {pb['description'][:100]} (seen {pb['frequency']}x)")
+            lines.append(f"- [{pb.get('type','pattern')}] {pb.get('description','')[:100]} (seen {pb.get('frequency','?')}x)")
 
     # Known solutions
     solutions = mem.get("known_solutions", [])

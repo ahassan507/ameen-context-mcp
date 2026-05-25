@@ -32,6 +32,15 @@ QUEUE_PATH = DATA_DIR / "_pending_structuring.jsonl"
 LOG_PATH = DATA_DIR / "_hook.log"
 STRUCTURE_SCRIPT = REPO / "hooks" / "structure_sessions.py"
 
+# Fingerprints that identify AgentOS meta-sessions (structuring / synthesis
+# claude -p calls). If any of these strings appear in the transcript excerpt
+# we skip vaulting entirely — otherwise we get infinite recursive loops.
+META_FINGERPRINTS = [
+    "Return ONLY a valid JSON object with these exact fields",   # EXTRACT_PROMPT
+    "You are extracting structured session memory",              # EXTRACT_PROMPT header
+    "You are writing a 4-6 sentence canonical project summary", # SUMMARY_PROMPT
+]
+
 
 def log(msg: str) -> None:
     try:
@@ -109,13 +118,20 @@ def main() -> int:
     if not excerpt and not cwd:
         return 0
 
+    # Guard: skip AgentOS meta-sessions (structuring/synthesis claude -p calls)
+    # to prevent infinite recursive vaulting loops.
+    for fingerprint in META_FINGERPRINTS:
+        if fingerprint in excerpt:
+            log(f"skipping meta-session (fingerprint matched: {fingerprint[:50]})")
+            return 0
+
     project = classify(cwd, excerpt)
     if not project:
         log(f"unclassified session at cwd={cwd}")
         return 0
 
     now = datetime.utcnow()
-    sid = now.strftime("%Y-%m-%d-%H%M")
+    sid = now.strftime("%Y-%m-%d-%H%M%S")
 
     # Write a raw session record (best-effort, unstructured summary)
     session = {
