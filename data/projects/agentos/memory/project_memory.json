@@ -1,7 +1,7 @@
 {
   "project": "agentos",
-  "last_updated": "2026-05-25T18:41:56Z",
-  "canonical_summary": "AgentOS is a personal session memory layer built on top of the ameen-context MCP server, designed so every Claude Code session auto-loads relevant project context at startup and auto-saves findings at close. The core infrastructure is complete: SessionStart and SessionEnd hooks, a `context_save_session` MCP tool, a v1 keyword+cwd-based project classifier, a backfill pipeline for processing historical session transcripts, and a fingerprint guard in session_end.py to block recursive meta-session processing. A major data cleanup pass on 2026-05-25 removed 2,233 garbage sessions and 2,631 stale queue entries, preserving 19 valid pending entries and re-running synthesize_memory.py to rebuild clean project memory from scratch; the MCP server is registered globally and confirmed active alongside computer-use, Claude_in_Chrome, and Control_Chrome. A project registry at data/projects/registry.json tracks 7 registered projects (agentos, rfp-project, rfp_intelligence_pro, RFP_Atharii, and others), with an agent map organized per project with role descriptions in table format; agentos is the infrastructure layer whose agents run across all other projects. Next priorities are validating the 19 remaining queue entries in the next synthesis pass, confirming end-to-end hook registration stability via install_hooks.sh, and deferring LLM-based session classification to a v2 pass once the cleaned v1 data layer is stable.",
+  "last_updated": "2026-05-25T19:08:51Z",
+  "canonical_summary": "AgentOS is a personal session memory layer built on top of the ameen-context MCP server, designed so every Claude Code session auto-loads relevant project context at startup and auto-saves findings at close. The core infrastructure is complete: SessionStart and SessionEnd hooks, a `context_save_session` MCP tool, a v1 keyword+cwd-based project classifier, a backfill pipeline for processing historical session transcripts, and a fingerprint guard in session_end.py to block recursive meta-session processing. A major data cleanup pass on 2026-05-25 removed 2,233 garbage sessions and 2,631 stale queue entries, preserving 19 valid pending entries and re-running synthesize_memory.py to rebuild clean project memory from scratch; the MCP server is registered globally and confirmed active alongside computer-use, Claude_in_Chrome, and Control_Chrome. A project registry at data/projects/registry.json tracks 7 registered projects (agentos, rfp-project, rfp_intelligence_pro, RFP_Atharii, and others), with an agent map organized per project with role descriptions in table format; agentos is the infrastructure layer whose agents run across all other projects. An unresolved open thread exists around a \"vault setup\" project referenced by the user \u2014 no prior memory or files were found, and its scope, location, and status remain unknown. Next priorities are resolving the vault setup context gap, validating the 19 remaining queue entries in the next synthesis pass, and confirming end-to-end hook registration stability via install_hooks.sh.",
   "known_solutions": [
     {
       "problem": "Memory Vault repo design only activates inside its own directory \u2014 not a global layer.",
@@ -183,6 +183,34 @@
       "solution": "Registry confirmed 7 active projects in AgentOS",
       "evidence_sessions": [
         "2026-05-25-182421"
+      ]
+    },
+    {
+      "problem": "No memory or context exists for a 'vault setup' project in any searched location",
+      "solution": "Memory search returned 0 results for 'vault'",
+      "evidence_sessions": [
+        "2026-05-25-190813"
+      ]
+    },
+    {
+      "problem": "No memory or context found for a 'vault setup' project in the AgentOS memory system",
+      "solution": "Memory search for 'vault' returned 0 results",
+      "evidence_sessions": [
+        "2026-05-25-190813"
+      ]
+    },
+    {
+      "problem": "No memory or context found for a 'vault setup' project in local or AgentOS memory",
+      "solution": "Local memory directory read failed with exit code 1",
+      "evidence_sessions": [
+        "2026-05-25-190813"
+      ]
+    },
+    {
+      "problem": "No stored memory context existed for 'vault setup' when user asked about it",
+      "solution": "21/21 registry and classifier tests passed",
+      "evidence_sessions": [
+        "2026-05-25-190814"
       ]
     }
   ],
@@ -388,6 +416,20 @@
       "status": "confirmed",
       "evidence_sessions": [
         "2026-05-25-182421"
+      ]
+    },
+    {
+      "decision": "The SessionStart hook is correctly wired and working; prior session without hook output was opened before the fix was deployed",
+      "status": "confirmed",
+      "evidence_sessions": [
+        "2026-05-25-190814"
+      ]
+    },
+    {
+      "decision": "Workshop_1_Files cwd falls back to agentos as the default project",
+      "status": "confirmed",
+      "evidence_sessions": [
+        "2026-05-25-190814"
       ]
     }
   ],
@@ -637,6 +679,78 @@
       "sessions": [
         "2026-05-25-182421"
       ]
+    },
+    {
+      "question": "What is the vault setup the user is referring to?",
+      "sessions": [
+        "2026-05-25-190813"
+      ]
+    },
+    {
+      "question": "Which project or directory does the vault setup belong to?",
+      "sessions": [
+        "2026-05-25-190813"
+      ]
+    },
+    {
+      "question": "Has any prior session documented the vault setup design or progress?",
+      "sessions": [
+        "2026-05-25-190813"
+      ]
+    },
+    {
+      "question": "What is the 'vault setup' the user is referring to \u2014 which project does it belong to?",
+      "sessions": [
+        "2026-05-25-190813"
+      ]
+    },
+    {
+      "question": "Where does the vault project live (which directory or repository)?",
+      "sessions": [
+        "2026-05-25-190813"
+      ]
+    },
+    {
+      "question": "What has been previously built or decided about the vault setup?",
+      "sessions": [
+        "2026-05-25-190813"
+      ]
+    },
+    {
+      "question": "Is the vault setup related to one of the known coding projects (rfp-project, rfp_intelligence_pro, RFP_Atharii, AgentOS)?",
+      "sessions": [
+        "2026-05-25-190813"
+      ]
+    },
+    {
+      "question": "What is 'the vault setup' \u2014 what does it store and which project does it belong to?",
+      "sessions": [
+        "2026-05-25-190813"
+      ]
+    },
+    {
+      "question": "Was the vault setup discussed in a prior session that wasn't captured in memory?",
+      "sessions": [
+        "2026-05-25-190813"
+      ]
+    },
+    {
+      "question": "Is the vault setup a separate project from the current working directory?",
+      "sessions": [
+        "2026-05-25-190813"
+      ]
+    },
+    {
+      "question": "What is the 'vault setup' the user referenced \u2014 no memory or documentation of it exists yet",
+      "sessions": [
+        "2026-05-25-190814"
+      ]
+    },
+    {
+      "question": "Was the vault setup concept discussed in a prior session that was not captured in memory?",
+      "sessions": [
+        "2026-05-25-190814"
+      ]
     }
   ],
   "contributors": [
@@ -661,7 +775,10 @@
       "2026-05-24-2018",
       "2026-05-25-172600",
       "2026-05-25-180522",
-      "2026-05-25-182421"
+      "2026-05-25-182421",
+      "2026-05-25-190813",
+      "2026-05-25-190813",
+      "2026-05-25-190814"
     ],
     "mcp": [
       "2026-05-24-init",
@@ -694,7 +811,8 @@
       "2026-05-24-2018",
       "2026-05-24-2018",
       "2026-05-25-172600",
-      "2026-05-25-182421"
+      "2026-05-25-182421",
+      "2026-05-25-190814"
     ],
     "agentOS": [
       "2026-05-24-1834"
@@ -940,6 +1058,51 @@
     ],
     "agent-design": [
       "2026-05-25-182421"
+    ],
+    "vault": [
+      "2026-05-25-190813",
+      "2026-05-25-190813",
+      "2026-05-25-190813"
+    ],
+    "memory-lookup": [
+      "2026-05-25-190813"
+    ],
+    "missing-context": [
+      "2026-05-25-190813",
+      "2026-05-25-190813"
+    ],
+    "clarification-needed": [
+      "2026-05-25-190813",
+      "2026-05-25-190813"
+    ],
+    "memory-search": [
+      "2026-05-25-190813",
+      "2026-05-25-190813",
+      "2026-05-25-190814"
+    ],
+    "context-missing": [
+      "2026-05-25-190813"
+    ],
+    "session-queue": [
+      "2026-05-25-190813"
+    ],
+    "no-prior-context": [
+      "2026-05-25-190813"
+    ],
+    "session-start-hook": [
+      "2026-05-25-190814"
+    ],
+    "classifier": [
+      "2026-05-25-190814"
+    ],
+    "registry": [
+      "2026-05-25-190814"
+    ],
+    "vault-setup": [
+      "2026-05-25-190814"
+    ],
+    "hook-registration": [
+      "2026-05-25-190814"
     ]
   }
 }

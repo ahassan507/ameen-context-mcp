@@ -1,7 +1,7 @@
 {
   "project": "ideas-lab",
-  "last_updated": "2026-05-25T18:32:50Z",
-  "canonical_summary": "The ideas-lab project tracks Ameen's work as a Business Analytics Intern at IDeaS Revenue Solutions (IDeaS.Lab), organized in a sprint-based workspace with weekly folders spanning Week-01 (Feb 3) through at least Week-08 (Mar 24), originally located at ~/Desktop/IDeaS_Workspace/. An automated scheduled task called 'ideas-workspace-weekly-sync' was set up to scan and summarize weekly workspace activity, and last produced real output on April 26, 2026. Every subsequent automated run \u2014 on May 4, May 15, and May 19 \u2014 has failed: the May 4 run produced a synthetic placeholder with zero token usage, the May 15 transcript was severely truncated, and the May 19 run could not locate the IDeaS_Workspace directory on the Desktop at all. The root cause is that the workspace directory has moved or been removed from its expected location, breaking directory discovery in all automated scans for over four weeks. The immediate next step is to manually locate the current IDeaS_Workspace directory, update the sync task's path configuration, and run a validation scan before the next scheduled execution.",
+  "last_updated": "2026-05-25T19:09:08Z",
+  "canonical_summary": "The ideas-lab project tracks Ameen's work as a Business Analytics Intern at IDeaS Revenue Solutions (IDeaS.Lab), organized in a sprint-based workspace with weekly folders spanning Week-01 (Feb 3) through at least Week-08 (Mar 24), originally located at ~/Desktop/IDeaS_Workspace/. An automated scheduled task called 'ideas-workspace-weekly-sync' was set up to scan and summarize weekly workspace activity, and last produced real output on April 26, 2026. Every subsequent automated run \u2014 on May 4, May 15, and May 19 \u2014 has failed: the May 4 run produced a synthetic placeholder with zero token usage, the May 15 transcript was severely truncated, and the May 19 run could not locate the IDeaS_Workspace directory on the Desktop at all. A separate session on May 25 addressed a GitHub repository (data-qualification-agent under ahassan507) that had accumulated 360chi health check report files in its commit history; the decision was made to replace the repo with a clean single-commit repo with no prior history and keep it private going forward. The root cause of the sync failures remains that the workspace directory has moved or been removed from its expected location, breaking directory discovery for over four weeks. The immediate next steps are to manually locate the current IDeaS_Workspace directory, update the sync task's path configuration, and run a validation scan before the next scheduled execution.",
   "known_solutions": [
     {
       "problem": "Need to determine which week folder each IDeaS_Lab file belongs to based on modification date",
@@ -23,9 +23,31 @@
       "evidence_sessions": [
         "2026-05-19-1747-c8f48609"
       ]
+    },
+    {
+      "problem": "360chi health check report files had been pushed to a GitHub repo and the user did not want them traceable",
+      "solution": "Report files confirmed still present on disk after git rm --cached",
+      "evidence_sessions": [
+        "2026-05-25-190813"
+      ]
     }
   ],
-  "decision_log": [],
+  "decision_log": [
+    {
+      "decision": "Replace existing repo with a clean single-commit repo with no prior history",
+      "status": "confirmed",
+      "evidence_sessions": [
+        "2026-05-25-190813"
+      ]
+    },
+    {
+      "decision": "Keep the repo private going forward",
+      "status": "confirmed",
+      "evidence_sessions": [
+        "2026-05-25-190813"
+      ]
+    }
+  ],
   "open_threads": [
     {
       "question": "Did the 'ideas-workspace-weekly-sync' scheduled task execute its intended logic, or did it fail silently?",
@@ -92,6 +114,24 @@
       "sessions": [
         "2026-05-19-1747-c8f48609"
       ]
+    },
+    {
+      "question": "Were sensitive files like .claude/settings.local.json and any xlsx files properly excluded from the fresh commit?",
+      "sessions": [
+        "2026-05-25-190813"
+      ]
+    },
+    {
+      "question": "Was the new GitHub repo created under the same name (data-qualification-agent) or a different one?",
+      "sessions": [
+        "2026-05-25-190813"
+      ]
+    },
+    {
+      "question": "Was the fresh commit pushed to GitHub successfully?",
+      "sessions": [
+        "2026-05-25-190813"
+      ]
     }
   ],
   "contributors": [],
@@ -139,6 +179,27 @@
     ],
     "permission-error": [
       "2026-05-19-1747-c8f48609"
+    ],
+    "github": [
+      "2026-05-25-190813"
+    ],
+    "git-history": [
+      "2026-05-25-190813"
+    ],
+    "data-qualification-agent": [
+      "2026-05-25-190813"
+    ],
+    "sensitive-files": [
+      "2026-05-25-190813"
+    ],
+    "repo-cleanup": [
+      "2026-05-25-190813"
+    ],
+    "ideas-internship": [
+      "2026-05-25-190813"
+    ],
+    "360chi": [
+      "2026-05-25-190813"
     ]
   }
 }
