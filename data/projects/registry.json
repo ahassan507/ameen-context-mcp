@@ -41,7 +41,7 @@
       "name": "ideas-lab",
       "keywords": ["ideas", "ideas.lab", "ideas lab", "ideas revenue", "copilot studio", "power automate", "sharepoint", "sprint deliverable"],
       "description": "IDeaS Revenue Solutions / IDeaS.Lab internship — Copilot agents, automation, process mapping.",
-      "paths": ["IDeaS-Lab", "IDeaS Lab", "IDeaS_Lab"]
+      "paths": ["IDeaS-Lab", "IDeaS Lab", "IDeaS_Lab", "IDeaS/", "/IDeaS"]
     }
   ]
 }
