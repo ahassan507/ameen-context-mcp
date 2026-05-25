@@ -1,7 +1,7 @@
 {
   "project": "agentos",
-  "last_updated": "2026-05-25T19:08:51Z",
-  "canonical_summary": "AgentOS (also called 'the vault') \u2014 AgentOS is a personal session memory layer built on top of the ameen-context MCP server, designed so every Claude Code session auto-loads relevant project context at startup and auto-saves findings at close. The core infrastructure is complete: SessionStart and SessionEnd hooks, a `context_save_session` MCP tool, a v1 keyword+cwd-based project classifier, a backfill pipeline for processing historical session transcripts, and a fingerprint guard in session_end.py to block recursive meta-session processing. A major data cleanup pass on 2026-05-25 removed 2,233 garbage sessions and 2,631 stale queue entries, preserving 19 valid pending entries and re-running synthesize_memory.py to rebuild clean project memory from scratch; the MCP server is registered globally and confirmed active alongside computer-use, Claude_in_Chrome, and Control_Chrome. A project registry at data/projects/registry.json tracks 7 registered projects (agentos, rfp-project, rfp_intelligence_pro, RFP_Atharii, and others), with an agent map organized per project with role descriptions in table format; agentos is the infrastructure layer whose agents run across all other projects. An unresolved open thread exists around a \"vault setup\" project referenced by the user \u2014 no prior memory or files were found, and its scope, location, and status remain unknown. Next priorities are resolving the vault setup context gap, validating the 19 remaining queue entries in the next synthesis pass, and confirming end-to-end hook registration stability via install_hooks.sh.",
+  "last_updated": "2026-05-25T19:27:04Z",
+  "canonical_summary": "AgentOS (also called 'the vault') is a personal session memory layer built on top of the ameen-context MCP server, designed so every Claude Code session auto-loads relevant project context at startup and auto-saves findings at close. The core infrastructure is complete: SessionStart and SessionEnd hooks, a `context_save_session` MCP tool, a v1 keyword+cwd-based project classifier, a backfill pipeline for processing historical session transcripts, and a fingerprint guard in session_end.py to block recursive meta-session processing. A major data cleanup pass on 2026-05-25 removed 2,233 garbage sessions and 2,631 stale queue entries, preserving 19 valid pending entries and re-running synthesize_memory.py to rebuild clean project memory from scratch; the MCP server is registered globally and confirmed active. A project registry at data/projects/registry.json tracks 7 registered projects (agentos, rfp-project, rfp_intelligence_pro, RFP_Atharii, and others), with an agent map organized per project with role descriptions in table format; agentos is the infrastructure layer whose agents run across all other projects. A 21/21 test suite confirmed correct registry structure, including that 'vault' and 'vault setup' keywords correctly map to agentos, and that the Workshop_1_Files directory falls back to agentos as the default project \u2014 the 'vault' reference in that directory was identified as an Obsidian vault for Building Bridges Workshop 1 materials, not a separate AgentOS project. Next priorities are validating the 19 remaining queue entries in the next synthesis pass and confirming end-to-end hook registration stability via install_hooks.sh.",
   "known_solutions": [
     {
       "problem": "Memory Vault repo design only activates inside its own directory \u2014 not a global layer.",
@@ -211,6 +211,20 @@
       "solution": "21/21 registry and classifier tests passed",
       "evidence_sessions": [
         "2026-05-25-190814"
+      ]
+    },
+    {
+      "problem": "No prior memory or documentation exists for 'the vault' in any searched location",
+      "solution": "No structured project memory or documentation exists for a 'vault setup' concept",
+      "evidence_sessions": [
+        "2026-05-25-192625"
+      ]
+    },
+    {
+      "problem": "Unclear what 'the vault' referred to in the Workshop_1_Files context",
+      "solution": "Workshop/ folder confirmed as an Obsidian vault for Building Bridges Workshop 1 materials; Welcome.md is the standard Obsidian onboarding note",
+      "evidence_sessions": [
+        "2026-05-25-192622"
       ]
     }
   ],
@@ -751,6 +765,48 @@
       "sessions": [
         "2026-05-25-190814"
       ]
+    },
+    {
+      "question": "What is 'the vault' \u2014 is it the Obsidian vault at Workshop_1_Files/Workshop/ or something else?",
+      "sessions": [
+        "2026-05-25-192625"
+      ]
+    },
+    {
+      "question": "What does the user want to do with or build in the vault?",
+      "sessions": [
+        "2026-05-25-192625"
+      ]
+    },
+    {
+      "question": "Is the vault setup a separate project with its own scope and deliverables?",
+      "sessions": [
+        "2026-05-25-192625"
+      ]
+    },
+    {
+      "question": "Was the vault setup discussed in a prior session that was not captured in memory?",
+      "sessions": [
+        "2026-05-25-192625"
+      ]
+    },
+    {
+      "question": "What is the full current status and next steps for the IDeaS ideas-lab sprint work?",
+      "sessions": [
+        "2026-05-25-192622"
+      ]
+    },
+    {
+      "question": "Are the 19 remaining queue entries in AgentOS valid and ready for the next synthesis pass?",
+      "sessions": [
+        "2026-05-25-192622"
+      ]
+    },
+    {
+      "question": "Is end-to-end hook registration stable after the last install_hooks.sh run?",
+      "sessions": [
+        "2026-05-25-192622"
+      ]
     }
   ],
   "contributors": [
@@ -778,7 +834,9 @@
       "2026-05-25-182421",
       "2026-05-25-190813",
       "2026-05-25-190813",
-      "2026-05-25-190814"
+      "2026-05-25-190814",
+      "2026-05-25-192625",
+      "2026-05-25-192622"
     ],
     "mcp": [
       "2026-05-24-init",
@@ -812,7 +870,8 @@
       "2026-05-24-2018",
       "2026-05-25-172600",
       "2026-05-25-182421",
-      "2026-05-25-190814"
+      "2026-05-25-190814",
+      "2026-05-25-192622"
     ],
     "agentOS": [
       "2026-05-24-1834"
@@ -831,7 +890,8 @@
       "2026-05-24-1850",
       "2026-05-24-1346-42c68c22",
       "2026-05-25-172600",
-      "2026-05-25-182421"
+      "2026-05-25-182421",
+      "2026-05-25-192622"
     ],
     "rfp": [
       "2026-05-24-1848"
@@ -879,10 +939,13 @@
       "2026-05-24-1346-42c68c22"
     ],
     "dhs-consulting": [
-      "2026-05-23-1545-84fd986f"
+      "2026-05-23-1545-84fd986f",
+      "2026-05-25-192625"
     ],
     "workshop-1": [
-      "2026-05-23-1545-84fd986f"
+      "2026-05-23-1545-84fd986f",
+      "2026-05-25-192625",
+      "2026-05-25-192622"
     ],
     "building-bridges": [
       "2026-05-23-1545-84fd986f"
@@ -1000,10 +1063,12 @@
     "ideas-lab": [
       "2026-05-24-2018",
       "2026-05-24-2018",
-      "2026-05-25-182419"
+      "2026-05-25-182419",
+      "2026-05-25-192622"
     ],
     "ideas-revenue-solutions": [
-      "2026-05-24-2018"
+      "2026-05-24-2018",
+      "2026-05-25-192622"
     ],
     "workspace-sync": [
       "2026-05-24-2018"
@@ -1062,7 +1127,8 @@
     "vault": [
       "2026-05-25-190813",
       "2026-05-25-190813",
-      "2026-05-25-190813"
+      "2026-05-25-190813",
+      "2026-05-25-192625"
     ],
     "memory-lookup": [
       "2026-05-25-190813"
@@ -1078,7 +1144,8 @@
     "memory-search": [
       "2026-05-25-190813",
       "2026-05-25-190813",
-      "2026-05-25-190814"
+      "2026-05-25-190814",
+      "2026-05-25-192625"
     ],
     "context-missing": [
       "2026-05-25-190813"
@@ -1103,6 +1170,18 @@
     ],
     "hook-registration": [
       "2026-05-25-190814"
+    ],
+    "obsidian": [
+      "2026-05-25-192625"
+    ],
+    "context-gap": [
+      "2026-05-25-192625"
+    ],
+    "obsidian-vault": [
+      "2026-05-25-192622"
+    ],
+    "project-memory-retrieval": [
+      "2026-05-25-192622"
     ]
   }
 }
