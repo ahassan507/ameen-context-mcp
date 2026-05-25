@@ -300,7 +300,7 @@ def auto_push_vault() -> None:
         # Commit — exits non-zero with "nothing to commit", which we catch
         result = subprocess.run(
             ["git", "-C", str(REPO), "commit", "-m",
-             f"chore: auto-sync vault {now_str} [agentos]"],
+             f"chore: auto-sync vault {now_str}"],
             capture_output=True, text=True,
         )
         if result.returncode != 0:
