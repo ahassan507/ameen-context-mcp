@@ -24,6 +24,9 @@ PROJECTS_DIR = DATA_DIR / "projects"
 QUEUE_PATH = DATA_DIR / "_pending_structuring.jsonl"
 DONE_PATH = DATA_DIR / "_structured.jsonl"
 LOG_PATH = DATA_DIR / "_hook.log"
+SYNTHESIS_SCRIPT = REPO / "hooks" / "synthesize_memory.py"
+SYNTHESIS_COUNTER_PATH = DATA_DIR / "_structured_since_synthesis.json"
+SYNTHESIS_TRIGGER_THRESHOLD = 5  # fire synthesis after this many structured sessions
 
 
 def log(msg: str) -> None:
@@ -55,6 +58,36 @@ Rules:
 CONVERSATION TRANSCRIPT:
 {excerpt}
 """
+
+
+def _maybe_trigger_synthesis() -> None:
+    """
+    Increment the structured-since-synthesis counter.
+    When it hits SYNTHESIS_TRIGGER_THRESHOLD, reset and fire a detached
+    synthesis pass so the project memory stays fresh automatically.
+    """
+    try:
+        counter = 0
+        if SYNTHESIS_COUNTER_PATH.exists():
+            try:
+                counter = json.loads(SYNTHESIS_COUNTER_PATH.read_text()).get("count", 0)
+            except Exception:
+                counter = 0
+
+        counter += 1
+        SYNTHESIS_COUNTER_PATH.write_text(json.dumps({"count": counter}))
+
+        if counter >= SYNTHESIS_TRIGGER_THRESHOLD:
+            SYNTHESIS_COUNTER_PATH.write_text(json.dumps({"count": 0}))
+            subprocess.Popen(
+                [sys.executable, str(SYNTHESIS_SCRIPT)],
+                stdout=subprocess.DEVNULL,
+                stderr=subprocess.DEVNULL,
+                start_new_session=True,
+            )
+            log(f"synthesis triggered after {counter} structured sessions")
+    except Exception as e:
+        log(f"_maybe_trigger_synthesis error: {e}")
 
 
 def extract_structure(excerpt: str) -> dict | None:
@@ -133,6 +166,7 @@ def structure_file(session_path: Path) -> bool:
         _merge_into_project_memory(project, session)
 
     log(f"structured {session_path.name} -> {len(session['decisions'])} decisions, {len(session['open_questions'])} open questions")
+    _maybe_trigger_synthesis()
     return True
 
 

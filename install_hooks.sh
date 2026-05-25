@@ -41,3 +41,24 @@ PY
 echo
 echo "Done. Restart Claude Code to activate hooks."
 echo "To revert: cp \"$BACKUP\" \"$SETTINGS\""
+
+# ---------------------------------------------------------------------------
+# Install launchd synthesis schedule (runs every Sunday at 02:00)
+# ---------------------------------------------------------------------------
+REPO_DIR="$(cd "$(dirname "$0")" && pwd)"
+PLIST_SRC="$REPO_DIR/launchd/com.ameenhassan.agentos-synthesis.plist"
+PLIST_DEST="$HOME/Library/LaunchAgents/com.ameenhassan.agentos-synthesis.plist"
+
+if [ -f "$PLIST_SRC" ]; then
+    # Unload existing job if present (ignore error if not loaded)
+    launchctl unload "$PLIST_DEST" 2>/dev/null || true
+    cp "$PLIST_SRC" "$PLIST_DEST"
+    launchctl load "$PLIST_DEST"
+    echo "Synthesis schedule installed: runs every Sunday at 02:00."
+    echo "  Plist: $PLIST_DEST"
+    echo "  Log:   $REPO_DIR/data/_synthesis_launchd.log"
+    echo "  To run now: launchctl start com.ameenhassan.agentos-synthesis"
+    echo "  To uninstall: launchctl unload \"$PLIST_DEST\" && rm \"$PLIST_DEST\""
+else
+    echo "WARNING: launchd plist not found at $PLIST_SRC — skipping schedule install."
+fi
