@@ -10,4 +10,6 @@ cd "$REPO" || exit 1
 
 echo "=== AgentOS synthesis pass $(date -u '+%Y-%m-%dT%H:%M:%SZ') ===" >&2
 
-/usr/local/bin/python3 hooks/synthesize_memory.py 2>&1
+# --digest: generate weekly cross-project digest on Sunday runs
+# --no-push omitted: auto-push is on by default
+/usr/local/bin/python3 hooks/synthesize_memory.py --digest 2>&1

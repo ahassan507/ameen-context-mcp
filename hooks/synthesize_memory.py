@@ -1,12 +1,15 @@
 #!/usr/bin/env python3
 """
-v2 Synthesis Pass — collapses repeated patterns across sessions into
-reusable playbooks, deduplicates open_threads, and refreshes canonical_summary.
+v3 Synthesis Pass — collapses repeated patterns, deduplicates threads,
+refreshes summaries, auto-pushes vault to GitHub, and generates a
+cross-project weekly digest.
 
 Run periodically (after every ~5 sessions, or manually):
-  python3 hooks/synthesize_memory.py                   # all projects
-  python3 hooks/synthesize_memory.py --project agentos # one project
-  python3 hooks/synthesize_memory.py --summary-only    # only refresh summaries
+  python3 hooks/synthesize_memory.py                    # all projects + auto-push
+  python3 hooks/synthesize_memory.py --project agentos  # one project + auto-push
+  python3 hooks/synthesize_memory.py --summary-only     # only refresh summaries
+  python3 hooks/synthesize_memory.py --digest           # also write weekly digest
+  python3 hooks/synthesize_memory.py --no-push          # skip git push (offline)
 
 What it does per project:
   1. Read all structured session files (skip pending/backfill)
@@ -15,6 +18,10 @@ What it does per project:
   4. Deduplicate open_threads (exact + near-duplicate by first 60 chars)
   5. Call claude -p to write a fresh canonical_summary from recent sessions
   6. Write updated project_memory.json
+
+After all projects:
+  7. git add data/ + commit + push to origin/main (skip with --no-push)
+  8. Write data/_weekly_digest_{date}.md (only with --digest)
 """
 
 import json
@@ -22,13 +29,14 @@ import re
 import subprocess
 import sys
 from collections import Counter, defaultdict
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
 REPO = Path(__file__).resolve().parent.parent
 DATA_DIR = REPO / "data"
 PROJECTS_DIR = DATA_DIR / "projects"
 LOG_PATH = DATA_DIR / "_hook.log"
+DIGESTS_DIR = DATA_DIR / "digests"
 
 PENDING_PLACEHOLDERS = {
     "(auto-captured by SessionEnd hook; pending structuring)",
@@ -276,9 +284,220 @@ def synthesize_project(project: str, summary_only: bool = False) -> bool:
     return changed
 
 
+def auto_push_vault() -> None:
+    """
+    Commit any data/ changes and push to origin/main.
+    Silently skips if nothing changed or if push fails (no internet, etc.).
+    """
+    now_str = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+    try:
+        # Stage all data/ changes (new sessions, updated memory, digests)
+        subprocess.run(
+            ["git", "-C", str(REPO), "add", "data/"],
+            check=True, capture_output=True,
+        )
+
+        # Commit — exits non-zero with "nothing to commit", which we catch
+        result = subprocess.run(
+            ["git", "-C", str(REPO), "commit", "-m",
+             f"chore: auto-sync vault {now_str} [agentos]"],
+            capture_output=True, text=True,
+        )
+        if result.returncode != 0:
+            if "nothing to commit" in result.stdout or "nothing to commit" in result.stderr:
+                print("  auto-push: nothing to commit, vault already in sync")
+                log("auto-push: nothing to commit")
+                return
+            # Some other commit error — log and bail before push
+            log(f"auto-push commit failed: {result.stderr.strip()}")
+            print(f"  auto-push: commit failed — {result.stderr.strip()[:120]}")
+            return
+
+        print(f"  auto-push: committed vault snapshot")
+
+        # Push
+        push = subprocess.run(
+            ["git", "-C", str(REPO), "push", "origin", "main"],
+            capture_output=True, text=True, timeout=30,
+        )
+        if push.returncode == 0:
+            print("  auto-push: pushed to origin/main ✓")
+            log("auto-push: success")
+        else:
+            print(f"  auto-push: push failed (offline?) — commit kept locally")
+            log(f"auto-push: push failed: {push.stderr.strip()[:200]}")
+
+    except subprocess.TimeoutExpired:
+        print("  auto-push: push timed out — commit kept locally")
+        log("auto-push: push timed out")
+    except Exception as e:
+        print(f"  auto-push: error — {e}")
+        log(f"auto-push error: {e}")
+
+
+def _load_sessions_since(cutoff: datetime) -> list[dict]:
+    """
+    Return all structured sessions across all projects with timestamp >= cutoff.
+    Sorted newest first.
+    """
+    results = []
+    for p in PROJECTS_DIR.iterdir():
+        if not p.is_dir():
+            continue
+        sessions_dir = p / "sessions"
+        if not sessions_dir.exists():
+            continue
+        for sf in sessions_dir.glob("*.json"):
+            try:
+                s = json.loads(sf.read_text())
+                summary = s.get("summary", "")
+                if any(summary.startswith(ph) for ph in PENDING_PLACEHOLDERS):
+                    continue
+                if not summary:
+                    continue
+                ts_str = s.get("timestamp", "")
+                if not ts_str:
+                    continue
+                ts = datetime.fromisoformat(ts_str.replace("Z", "+00:00"))
+                if ts >= cutoff:
+                    results.append(s)
+            except Exception:
+                continue
+    results.sort(key=lambda x: x.get("timestamp", ""), reverse=True)
+    return results
+
+
+def generate_weekly_digest() -> Path:
+    """
+    Write a markdown digest of the past 7 days to data/digests/digest_{date}.md.
+    Returns the path to the written file.
+    """
+    DIGESTS_DIR.mkdir(parents=True, exist_ok=True)
+    now = datetime.now(timezone.utc)
+    week_start = now - timedelta(days=7)
+    date_str = now.strftime("%Y-%m-%d")
+
+    sessions = _load_sessions_since(week_start)
+
+    # Aggregate per project
+    by_project: dict[str, list[dict]] = defaultdict(list)
+    for s in sessions:
+        proj = s.get("project") or "unclassified"
+        by_project[proj].append(s)
+
+    total_sessions = len(sessions)
+    total_decisions = sum(
+        len([d for d in s.get("decisions", []) if d.get("status") == "confirmed"])
+        for s in sessions
+    )
+    total_problems = sum(len(s.get("problems", [])) for s in sessions)
+    total_threads = sum(len(s.get("open_questions", [])) for s in sessions)
+
+    lines = [
+        f"# AgentOS Weekly Digest — Week of {week_start.strftime('%Y-%m-%d')}",
+        f"",
+        f"Generated: {now.strftime('%Y-%m-%dT%H:%M:%SZ')}",
+        f"",
+        f"## At a Glance",
+        f"- **{total_sessions} session{'s' if total_sessions != 1 else ''}** across "
+        f"{len(by_project)} project{'s' if len(by_project) != 1 else ''}",
+        f"- **{total_decisions} decision{'s' if total_decisions != 1 else ''}** confirmed",
+        f"- **{total_problems} problem{'s' if total_problems != 1 else ''}** surfaced",
+        f"- **{total_threads} open thread{'s' if total_threads != 1 else ''}** added",
+        f"",
+    ]
+
+    if not by_project:
+        lines.append("_No structured sessions this week._")
+    else:
+        lines.append("## By Project")
+        lines.append("")
+
+        for proj in sorted(by_project.keys()):
+            proj_sessions = by_project[proj]
+            lines.append(f"### {proj} — {len(proj_sessions)} session{'s' if len(proj_sessions) != 1 else ''}")
+
+            # Canonical summary excerpt
+            mem_path = PROJECTS_DIR / proj / "memory" / "project_memory.json"
+            if mem_path.exists():
+                try:
+                    mem = json.loads(mem_path.read_text())
+                    summary = mem.get("canonical_summary", "")
+                    if summary:
+                        lines.append(f"> {summary[:240]}{'…' if len(summary) > 240 else ''}")
+                        lines.append("")
+                except Exception:
+                    pass
+
+            # Sessions this week
+            lines.append("**Sessions this week:**")
+            for s in proj_sessions:
+                day = s.get("timestamp", "")[:10]
+                snippet = s.get("summary", "")[:120]
+                lines.append(f"- [{day}] {snippet}{'…' if len(s.get('summary','')) > 120 else ''}")
+            lines.append("")
+
+            # Decisions confirmed this week
+            week_decisions = [
+                d.get("decision", "")
+                for s in proj_sessions
+                for d in s.get("decisions", [])
+                if d.get("status") == "confirmed"
+            ]
+            if week_decisions:
+                lines.append("**Decisions confirmed:**")
+                for d in week_decisions[:5]:
+                    lines.append(f"- {d[:100]}")
+                lines.append("")
+
+            # New open threads this week
+            week_threads = [
+                q
+                for s in proj_sessions
+                for q in s.get("open_questions", [])
+            ]
+            if week_threads:
+                lines.append("**New open threads:**")
+                for q in week_threads[:5]:
+                    lines.append(f"- {q[:100]}")
+                lines.append("")
+
+    # Cross-project open threads from project memory
+    all_threads = []
+    for p in PROJECTS_DIR.iterdir():
+        if not p.is_dir():
+            continue
+        mem_path = p / "memory" / "project_memory.json"
+        if not mem_path.exists():
+            continue
+        try:
+            mem = json.loads(mem_path.read_text())
+            for t in mem.get("open_threads", [])[-5:]:
+                all_threads.append((p.name, t.get("question", "")))
+        except Exception:
+            continue
+
+    if all_threads:
+        lines.append("---")
+        lines.append("")
+        lines.append(f"## All Open Threads ({len(all_threads)} across all projects)")
+        lines.append("")
+        for proj, q in all_threads[-15:]:
+            lines.append(f"- **[{proj}]** {q[:100]}")
+        lines.append("")
+
+    content = "\n".join(lines)
+    out_path = DIGESTS_DIR / f"digest_{date_str}.md"
+    out_path.write_text(content)
+    log(f"digest written: {out_path.name} ({total_sessions} sessions, {len(by_project)} projects)")
+    return out_path
+
+
 def main():
     args = sys.argv[1:]
     summary_only = "--summary-only" in args
+    do_digest = "--digest" in args
+    do_push = "--no-push" not in args  # push by default unless --no-push
     target_project = None
     if "--project" in args:
         idx = args.index("--project")
@@ -296,6 +515,15 @@ def main():
     print(f"Synthesis pass — {len(projects)} project(s)")
     for proj in projects:
         synthesize_project(proj, summary_only=summary_only)
+
+    if do_digest:
+        print("\nGenerating weekly digest...")
+        out_path = generate_weekly_digest()
+        print(f"  digest written: {out_path}")
+
+    if do_push:
+        print("\nAuto-pushing vault to GitHub...")
+        auto_push_vault()
 
     print("\nDone.")
 
