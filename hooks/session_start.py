@@ -96,6 +96,13 @@ def summarize_project(project: str) -> str:
 
     lines = [f"## Session Memory — project: {project}"]
 
+    # Alias map — surfaces known nicknames so the assistant doesn't search for them
+    ALIASES = {
+        "agentos": "AgentOS = 'the vault' = 'session memory system' = 'ameen-context-mcp'",
+    }
+    if project in ALIASES:
+        lines.append(f"Aliases: {ALIASES[project]}")
+
     if mem.get("canonical_summary"):
         lines.append(f"Summary: {mem['canonical_summary']}")
     if mem.get("last_updated"):
