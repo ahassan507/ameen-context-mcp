@@ -21,7 +21,7 @@ What it does per project:
 
 After all projects:
   7. git add data/ + commit + push to origin/main (skip with --no-push)
-  8. Write data/_weekly_digest_{date}.md (only with --digest)
+  8. Write data/digests/digest_{date}.md (only with --digest)
 """
 
 import json
