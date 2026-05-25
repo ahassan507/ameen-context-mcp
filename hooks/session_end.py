@@ -25,7 +25,7 @@ import json
 import re
 import subprocess
 import sys
-from datetime import datetime
+from datetime import datetime, timezone
 from pathlib import Path
 
 REPO = Path(__file__).resolve().parent.parent
@@ -52,7 +52,7 @@ META_FINGERPRINTS = [
 def log(msg: str) -> None:
     try:
         with open(LOG_PATH, "a") as f:
-            f.write(f"{datetime.utcnow().isoformat()}Z session_end: {msg}\n")
+            f.write(f"{datetime.now(timezone.utc).isoformat()}Z session_end: {msg}\n")
     except Exception:
         pass
 
@@ -212,7 +212,7 @@ def auto_register_project(cwd: str) -> str | None:
 
         # Initialise project_memory.json
         mem_path = proj_dir / "memory" / "project_memory.json"
-        now_str = datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%SZ")
+        now_str = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
         mem = {
             "project": slug,
             "last_updated": now_str,
@@ -312,7 +312,7 @@ def main() -> int:
             return 0
 
     # Build session ID early — needed on both classified and unclassified paths.
-    now = datetime.utcnow()
+    now = datetime.now(timezone.utc)
     sid = now.strftime("%Y-%m-%d-%H%M%S")
     timestamp = now.strftime("%Y-%m-%dT%H:%M:%SZ")
 

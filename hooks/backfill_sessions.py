@@ -17,7 +17,7 @@ Options:
 import json
 import re
 import sys
-from datetime import datetime
+from datetime import datetime, timezone
 from pathlib import Path
 
 REPO = Path(__file__).resolve().parent.parent
@@ -31,7 +31,7 @@ CLAUDE_PROJECTS = Path.home() / ".claude" / "projects"
 
 def log(msg: str) -> None:
     with open(LOG_PATH, "a") as f:
-        f.write(f"{datetime.utcnow().isoformat()}Z backfill: {msg}\n")
+        f.write(f"{datetime.now(timezone.utc).isoformat()}Z backfill: {msg}\n")
 
 
 def load_registry() -> dict:
@@ -115,7 +115,7 @@ def save_raw(project: str, session_id: str, cwd: str, excerpt: str,
     if out_path.exists():
         return False
 
-    now = datetime.utcnow()
+    now = datetime.now(timezone.utc)
     session = {
         "session_id": session_id,
         "timestamp": now.strftime("%Y-%m-%dT%H:%M:%SZ"),

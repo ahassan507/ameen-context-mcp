@@ -22,7 +22,7 @@ import re
 import subprocess
 import sys
 from collections import Counter, defaultdict
-from datetime import datetime
+from datetime import datetime, timezone
 from pathlib import Path
 
 REPO = Path(__file__).resolve().parent.parent
@@ -54,7 +54,7 @@ Return ONLY the summary text — no preamble, no markdown, no JSON.
 
 def log(msg: str) -> None:
     with open(LOG_PATH, "a") as f:
-        f.write(f"{datetime.utcnow().isoformat()}Z synthesize: {msg}\n")
+        f.write(f"{datetime.now(timezone.utc).isoformat()}Z synthesize: {msg}\n")
 
 
 def load_structured_sessions(project: str) -> list[dict]:
@@ -268,7 +268,7 @@ def synthesize_project(project: str, summary_only: bool = False) -> bool:
         print(f"    summary: claude CLI unavailable, keeping existing")
 
     if changed:
-        memory["last_updated"] = datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%SZ")
+        memory["last_updated"] = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
         with open(mem_path, "w") as f:
             json.dump(memory, f, indent=2)
         print(f"    ✓ written")

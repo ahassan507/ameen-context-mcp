@@ -15,7 +15,7 @@ import json
 import subprocess
 import sys
 import re
-from datetime import datetime
+from datetime import datetime, timezone
 from pathlib import Path
 
 REPO = Path(__file__).resolve().parent.parent
@@ -31,7 +31,7 @@ SYNTHESIS_TRIGGER_THRESHOLD = 5  # fire synthesis after this many structured ses
 
 def log(msg: str) -> None:
     with open(LOG_PATH, "a") as f:
-        f.write(f"{datetime.utcnow().isoformat()}Z structure: {msg}\n")
+        f.write(f"{datetime.now(timezone.utc).isoformat()}Z structure: {msg}\n")
 
 
 EXTRACT_PROMPT = """You are extracting structured session memory from a Claude Code conversation transcript.
@@ -155,7 +155,7 @@ def structure_file(session_path: Path) -> bool:
     session["decisions"] = structured.get("decisions", [])
     session["open_questions"] = structured.get("open_questions", [])
     session["tags"] = structured.get("tags", [])
-    session["structured_at"] = datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%SZ")
+    session["structured_at"] = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
 
     with open(session_path, "w") as f:
         json.dump(session, f, indent=2)
@@ -214,7 +214,7 @@ def _merge_into_project_memory(project: str, session: dict) -> None:
         changed = True
 
     if changed:
-        memory["last_updated"] = datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%SZ")
+        memory["last_updated"] = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
         with open(mem_path, "w") as f:
             json.dump(memory, f, indent=2)
 
@@ -257,7 +257,7 @@ def process_queue() -> int:
         ok = structure_file(p)
         if ok:
             with open(DONE_PATH, "a") as f:
-                f.write(json.dumps({"session_path": str(p), "done_at": datetime.utcnow().isoformat()}) + "\n")
+                f.write(json.dumps({"session_path": str(p), "done_at": datetime.now(timezone.utc).isoformat()}) + "\n")
             print(f"  ✓ {p.name}")
             success += 1
         else:
