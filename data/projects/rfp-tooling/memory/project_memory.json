@@ -1,7 +1,7 @@
 {
   "project": "rfp-tooling",
-  "last_updated": "2026-05-24T20:17:53Z",
-  "canonical_summary": "The rfp-tooling project is an RFP eligibility analysis and scoring system for behavioral health grant opportunities, particularly Minnesota DHS funding streams relevant to Rooted Wellness & Recovery and associated organizations. No implementation has been built yet \u2014 the project is in the design/scoping phase. The primary design question explored so far is how to score RFP eligibility, with a recommended two-tier approach: hard gates (pass/fail mandatory criteria such as 245G licensure, geographic service area, org type, and prior grant restrictions) evaluated first, followed by weighted scoring for eligible applicants. Next steps are to formalize this scoring model into a working implementation, likely as a Python-based tool consistent with the rfp_intelligence_pro stack.",
+  "last_updated": "2026-05-25T18:24:20Z",
+  "canonical_summary": "The rfp-tooling project is an RFP eligibility analysis and scoring system for behavioral health grant opportunities, focused on Minnesota DHS funding streams relevant to Rooted Wellness & Recovery and associated organizations (Uplift Treatment Center, Bridge Healing Center, Pathway to Recovery). No implementation has been built yet \u2014 the project remains in the design and scoping phase. Two separate sessions have converged on the same architectural recommendation: a two-tier scoring approach that evaluates hard gates (pass/fail mandatory criteria such as 245G licensure, geographic service area, organization type, and prior grant restrictions) before applying weighted scoring to eligible applicants. The next concrete step is to formalize this scoring model into a working implementation, likely as a Python-based tool consistent with the rfp_intelligence_pro stack already in use.",
   "known_solutions": [
     {
       "problem": "How to structure RFP eligibility scoring",

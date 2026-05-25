@@ -1,7 +1,7 @@
 {
   "project": "agentos",
-  "last_updated": "2026-05-25T17:10:01Z",
-  "canonical_summary": "AgentOS is a personal session memory layer built on top of the ameen-context MCP server, designed so every Claude Code session auto-loads relevant project context at startup and auto-saves findings at close. The core infrastructure is complete: SessionStart and SessionEnd hooks, a `context_save_session` MCP tool, a v1 keyword+cwd-based project classifier, and a backfill pipeline for processing 15 historical session transcripts through the structured memory system. Hook registration via direct agent modification of `~/.claude/settings.json` is blocked by Claude Code's auto-mode guardrails, so `install_hooks.sh` is the designated delivery mechanism for wiring hooks globally \u2014 the SessionStart hook is confirmed functional and loading context at session open. The MCP server is registered via `claude mcp add ameen-context -s user python3 ...` and responding to tool calls; recent sessions have been primarily minimal SessionEnd memory extraction passes, confirming the hooks are firing but producing little new substantive content. Next priorities are validating backfill pipeline output quality against the 15 historical transcripts, confirming end-to-end hook registration stability via install_hooks.sh, and deferring LLM-based session classification to a v2 pass once v1 is stable.",
+  "last_updated": "2026-05-25T18:24:50Z",
+  "canonical_summary": "AgentOS is a personal session memory layer built on top of the ameen-context MCP server, designed so every Claude Code session auto-loads relevant project context at startup and auto-saves findings at close. The core infrastructure is complete: SessionStart and SessionEnd hooks, a `context_save_session` MCP tool, a v1 keyword+cwd-based project classifier, a backfill pipeline for processing historical session transcripts, and a fingerprint guard in session_end.py to block recursive meta-session processing. A major data cleanup pass on 2026-05-25 removed 2,233 garbage sessions and 2,631 stale queue entries, preserving 19 valid pending entries and re-running synthesize_memory.py to rebuild clean project memory from scratch. The MCP server is registered globally via `claude mcp add ameen-context -s user python3 ...` and confirmed connected alongside other active servers including computer-use, Claude_in_Chrome, and Control_Chrome. Next priorities are validating that the 19 remaining queue entries process correctly in the next synthesis pass, confirming end-to-end hook registration stability via install_hooks.sh, and deferring LLM-based session classification to a v2 pass once the cleaned v1 data layer is stable.",
   "known_solutions": [
     {
       "problem": "Memory Vault repo design only activates inside its own directory \u2014 not a global layer.",
@@ -155,6 +155,34 @@
       "solution": "Valid JSON memory object produced for the ideas-lab canonical summary session",
       "evidence_sessions": [
         "2026-05-24-2018"
+      ]
+    },
+    {
+      "problem": "Garbage session entries had accumulated in storage (2,233 entries deleted)",
+      "solution": "2,233 garbage sessions deleted",
+      "evidence_sessions": [
+        "2026-05-25-172600"
+      ]
+    },
+    {
+      "problem": "User wanted to verify MCP server connectivity status",
+      "solution": "MCP servers confirmed connected: computer-use, Claude_in_Chrome, Control_Chrome, Claude_Preview, and ameen-context among others visible in deferred tool list",
+      "evidence_sessions": [
+        "2026-05-25-180522"
+      ]
+    },
+    {
+      "problem": "Report files had been committed and pushed to GitHub, exposing 360chi health check data and prior org-linked commit history",
+      "solution": "Report files confirmed still present on disk after git rm --cached",
+      "evidence_sessions": [
+        "2026-05-25-182419"
+      ]
+    },
+    {
+      "problem": "No consolidated agent map existed across AgentOS projects",
+      "solution": "Registry confirmed 7 active projects in AgentOS",
+      "evidence_sessions": [
+        "2026-05-25-182421"
       ]
     }
   ],
@@ -318,6 +346,48 @@
       "status": "confirmed",
       "evidence_sessions": [
         "2026-05-24-2018"
+      ]
+    },
+    {
+      "decision": "Purge garbage sessions and stale queue entries before re-synthesizing memory",
+      "status": "confirmed",
+      "evidence_sessions": [
+        "2026-05-25-172600"
+      ]
+    },
+    {
+      "decision": "Fingerprint guard in session_end.py is the mechanism to block recursive meta-session processing",
+      "status": "confirmed",
+      "evidence_sessions": [
+        "2026-05-25-172600"
+      ]
+    },
+    {
+      "decision": "Replace existing repo with a clean single-commit repo with no prior history",
+      "status": "confirmed",
+      "evidence_sessions": [
+        "2026-05-25-182419"
+      ]
+    },
+    {
+      "decision": "Keep the repo private going forward",
+      "status": "confirmed",
+      "evidence_sessions": [
+        "2026-05-25-182419"
+      ]
+    },
+    {
+      "decision": "agentos is the infrastructure layer whose agents run across all other projects",
+      "status": "confirmed",
+      "evidence_sessions": [
+        "2026-05-25-182421"
+      ]
+    },
+    {
+      "decision": "Agent map should be organized per project with role descriptions in table format",
+      "status": "confirmed",
+      "evidence_sessions": [
+        "2026-05-25-182421"
       ]
     }
   ],
@@ -519,6 +589,54 @@
       "sessions": [
         "2026-05-24-2018"
       ]
+    },
+    {
+      "question": "Whether the 19 valid pending queue entries will be processed correctly in the next synthesis pass",
+      "sessions": [
+        "2026-05-25-172600"
+      ]
+    },
+    {
+      "question": "Whether the git commit completed successfully (transcript was cut off during git add)",
+      "sessions": [
+        "2026-05-25-172600"
+      ]
+    },
+    {
+      "question": "Was the fresh repo successfully committed and pushed to GitHub before the session ended?",
+      "sessions": [
+        "2026-05-25-182419"
+      ]
+    },
+    {
+      "question": "Were sensitive files like .claude/settings.local.json and any xlsx files properly excluded from the new commit?",
+      "sessions": [
+        "2026-05-25-182419"
+      ]
+    },
+    {
+      "question": "Was the new GitHub repo created under the same name (data-qualification-agent) or a different one?",
+      "sessions": [
+        "2026-05-25-182419"
+      ]
+    },
+    {
+      "question": "What is the complete agent map for all 7 projects beyond the agentos infrastructure layer?",
+      "sessions": [
+        "2026-05-25-182421"
+      ]
+    },
+    {
+      "question": "Were all coding projects in the directory (bengal, somalia, Code, Project#1, etc.) accounted for or excluded from the registry intentionally?",
+      "sessions": [
+        "2026-05-25-182421"
+      ]
+    },
+    {
+      "question": "What agents are needed specifically for rfp-project, rfp_intelligence_pro, and RFP_Atharii?",
+      "sessions": [
+        "2026-05-25-182421"
+      ]
     }
   ],
   "contributors": [
@@ -540,13 +658,17 @@
       "2026-05-24-2018",
       "2026-05-24-2018",
       "2026-05-24-2018",
-      "2026-05-24-2018"
+      "2026-05-24-2018",
+      "2026-05-25-172600",
+      "2026-05-25-180522",
+      "2026-05-25-182421"
     ],
     "mcp": [
       "2026-05-24-init",
       "2026-05-23-1638-1510da95",
       "2026-05-23-1638-ab528c74",
-      "2026-05-24-2017"
+      "2026-05-24-2017",
+      "2026-05-25-180522"
     ],
     "hooks": [
       "2026-05-24-init",
@@ -570,7 +692,9 @@
       "2026-05-24-2018",
       "2026-05-24-2018",
       "2026-05-24-2018",
-      "2026-05-24-2018"
+      "2026-05-24-2018",
+      "2026-05-25-172600",
+      "2026-05-25-182421"
     ],
     "agentOS": [
       "2026-05-24-1834"
@@ -587,7 +711,9 @@
     "ameen-context-mcp": [
       "2026-05-24-1834",
       "2026-05-24-1850",
-      "2026-05-24-1346-42c68c22"
+      "2026-05-24-1346-42c68c22",
+      "2026-05-25-172600",
+      "2026-05-25-182421"
     ],
     "rfp": [
       "2026-05-24-1848"
@@ -625,7 +751,8 @@
       "2026-05-24-1346-42c68c22"
     ],
     "project-registry": [
-      "2026-05-24-1346-42c68c22"
+      "2026-05-24-1346-42c68c22",
+      "2026-05-25-182421"
     ],
     "jsonl": [
       "2026-05-24-1346-42c68c22"
@@ -655,7 +782,8 @@
       "2026-05-23-1545-84fd986f"
     ],
     "connectivity-check": [
-      "2026-05-23-1638-1510da95"
+      "2026-05-23-1638-1510da95",
+      "2026-05-25-180522"
     ],
     "session-start": [
       "2026-05-23-1638-1510da95"
@@ -731,7 +859,8 @@
     ],
     "rfp-tooling": [
       "2026-05-24-2017",
-      "2026-05-24-2018"
+      "2026-05-24-2018",
+      "2026-05-25-182421"
     ],
     "behavioral-health": [
       "2026-05-24-2017"
@@ -752,7 +881,8 @@
     ],
     "ideas-lab": [
       "2026-05-24-2018",
-      "2026-05-24-2018"
+      "2026-05-24-2018",
+      "2026-05-25-182419"
     ],
     "ideas-revenue-solutions": [
       "2026-05-24-2018"
@@ -765,6 +895,51 @@
     ],
     "automation": [
       "2026-05-24-2018"
+    ],
+    "data-cleanup": [
+      "2026-05-25-172600"
+    ],
+    "synthesize-memory": [
+      "2026-05-25-172600"
+    ],
+    "fingerprint-guard": [
+      "2026-05-25-172600"
+    ],
+    "meta-session-blocking": [
+      "2026-05-25-172600"
+    ],
+    "queue-cleanup": [
+      "2026-05-25-172600"
+    ],
+    "status-check": [
+      "2026-05-25-180522"
+    ],
+    "session-minimal": [
+      "2026-05-25-180522"
+    ],
+    "github": [
+      "2026-05-25-182419"
+    ],
+    "git-history": [
+      "2026-05-25-182419"
+    ],
+    "data-qualification-agent": [
+      "2026-05-25-182419"
+    ],
+    "repo-cleanup": [
+      "2026-05-25-182419"
+    ],
+    "privacy": [
+      "2026-05-25-182419"
+    ],
+    "360chi": [
+      "2026-05-25-182419"
+    ],
+    "agent-map": [
+      "2026-05-25-182421"
+    ],
+    "agent-design": [
+      "2026-05-25-182421"
     ]
   }
 }
