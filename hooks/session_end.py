@@ -176,6 +176,14 @@ def auto_register_project(cwd: str) -> str | None:
     Returns the new project slug, or None on failure.
     """
     try:
+        # Guard: don't re-register a cwd that was already processed.
+        if UNCLASSIFIED_CWDS_PATH.exists():
+            existing = json.loads(UNCLASSIFIED_CWDS_PATH.read_text())
+            if existing.get(cwd, {}).get("registered_as"):
+                log(f"auto_register_project: cwd={cwd} already registered as "
+                    f"'{existing[cwd]['registered_as']}', skipping")
+                return existing[cwd]["registered_as"]
+
         with open(REGISTRY_PATH) as f:
             registry = json.load(f)
 
@@ -185,9 +193,14 @@ def auto_register_project(cwd: str) -> str | None:
 
         registry["projects"].append({
             "name": slug,
-            "keywords": [base_slug.replace("-", " "), dir_name.lower()],
+            # No auto-generated keywords — dir/basename words are substrings of
+            # any unrelated cwd that happens to share the same folder name, which
+            # causes false classification. Use only the full path for matching.
+            # User can add real topic keywords later via registry.json.
+            "keywords": [],
             "description": f"Auto-registered from unclassified sessions. Source: {cwd}",
-            "paths": [dir_name],
+            # Full cwd path (not basename) ensures only this exact directory matches.
+            "paths": [cwd],
         })
         with open(REGISTRY_PATH, "w") as f:
             json.dump(registry, f, indent=2)
@@ -244,6 +257,18 @@ def auto_register_project(cwd: str) -> str | None:
 
                 buf_path.unlink()
                 moved += 1
+
+                # Dispatch background structuring immediately (same as classified path)
+                try:
+                    subprocess.Popen(
+                        [sys.executable, str(STRUCTURE_SCRIPT), "--file", str(out_path)],
+                        stdout=subprocess.DEVNULL,
+                        stderr=subprocess.DEVNULL,
+                        start_new_session=True,
+                    )
+                except Exception as popen_err:
+                    log(f"structuring dispatch failed for {out_path.name}: {popen_err}")
+
             except Exception as e:
                 log(f"failed to migrate buffer {buf_path.name}: {e}")
 
