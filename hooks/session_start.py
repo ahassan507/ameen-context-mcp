@@ -96,6 +96,15 @@ def summarize_project(project: str) -> str:
 
     lines = [f"## Session Memory — project: {project}"]
 
+    # Resolution order — always shown at the top of every injected context block
+    lines.append(
+        "RESOLUTION ORDER: When looking up any project, person, task, or topic — "
+        "(1) read this injected context first, "
+        "(2) call ameen-context MCP tools (context_get_project_memory, context_search_memories) second, "
+        "(3) only search local files if MCP returns nothing. "
+        "Never search local files before checking MCP."
+    )
+
     # Alias map — surfaces known nicknames so the assistant doesn't search for them
     ALIASES = {
         "agentos": "AgentOS = 'the vault' = 'session memory system' = 'ameen-context-mcp'",
