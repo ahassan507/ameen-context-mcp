@@ -81,21 +81,157 @@ def context_get_full_profile() -> str:
 @mcp.tool()
 def context_search_memories(query: str) -> str:
     """
-    Search memory files in data/memories/ for entries matching the query string.
-    Matches against filename and file content (case-insensitive).
-    Returns matching file names and their content.
-    """
-    query_lower = query.lower()
-    results = []
+    Search ALL memory sources for the query string (case-insensitive):
+      - data/memories/*.md  (freeform memory notes)
+      - Every project's canonical_summary, decision_log, open_threads,
+        known_solutions, and recent session summaries
 
+    Returns hits grouped by source so the caller knows which project each
+    result came from.
+
+    Args:
+        query: keyword or phrase to search for
+    """
+    if not query or not query.strip():
+        return json.dumps({"error": "query cannot be empty"})
+
+    q = query.strip().lower()
+    output: dict = {"query": query, "total_hits": 0, "memories": [], "projects": {}}
+
+    # 1. data/memories/*.md
     for md_file in sorted(MEMORIES_DIR.glob("*.md")):
         content = md_file.read_text()
-        if query_lower in md_file.name.lower() or query_lower in content.lower():
-            results.append({"file": md_file.name, "content": content})
+        if q in md_file.name.lower() or q in content.lower():
+            output["memories"].append({"file": md_file.name, "excerpt": content[:400]})
 
-    if not results:
-        return json.dumps({"found": 0, "results": []})
-    return json.dumps({"found": len(results), "results": results}, indent=2)
+    # 2. All project memories
+    registry = _load_registry()
+    for proj in registry.get("projects", []):
+        name = proj["name"]
+        mem = _load_project_memory(name)
+        if not mem:
+            continue
+
+        hits: dict = {}
+
+        # canonical_summary
+        summary = mem.get("canonical_summary", "")
+        if q in summary.lower():
+            hits["canonical_summary"] = summary[:300]
+
+        # decision_log
+        matching_decisions = [
+            d.get("decision", "") for d in mem.get("decision_log", [])
+            if q in d.get("decision", "").lower()
+        ]
+        if matching_decisions:
+            hits["decisions"] = matching_decisions[:5]
+
+        # open_threads
+        matching_threads = [
+            t.get("question", "") for t in mem.get("open_threads", [])
+            if q in t.get("question", "").lower()
+        ]
+        if matching_threads:
+            hits["open_threads"] = matching_threads[:5]
+
+        # known_solutions
+        matching_solutions = [
+            {"problem": s.get("problem", ""), "solution": s.get("solution", "")}
+            for s in mem.get("known_solutions", [])
+            if q in s.get("problem", "").lower() or q in s.get("solution", "").lower()
+        ]
+        if matching_solutions:
+            hits["known_solutions"] = matching_solutions[:5]
+
+        # recent session summaries
+        sessions_dir = PROJECTS_DIR / name / "sessions"
+        if sessions_dir.exists():
+            matching_sessions = []
+            pending = {"(auto-captured", "(backfilled"}
+            for p in sorted(sessions_dir.glob("*.json"), reverse=True)[:20]:
+                try:
+                    s = json.loads(p.read_text())
+                    sess_summary = s.get("summary", "")
+                    if any(sess_summary.startswith(ph) for ph in pending):
+                        continue
+                    if q in sess_summary.lower():
+                        matching_sessions.append({
+                            "session_id": s.get("session_id"),
+                            "summary": sess_summary[:200],
+                        })
+                        if len(matching_sessions) >= 3:
+                            break
+                except Exception:
+                    continue
+            if matching_sessions:
+                hits["sessions"] = matching_sessions
+
+        if hits:
+            output["projects"][name] = hits
+
+    output["total_hits"] = (
+        len(output["memories"]) + sum(
+            sum(len(v) if isinstance(v, list) else 1 for v in ph.values())
+            for ph in output["projects"].values()
+        )
+    )
+
+    if output["total_hits"] == 0:
+        return json.dumps({"query": query, "found": 0, "results": []})
+
+    return json.dumps(output, indent=2)
+
+
+@mcp.tool()
+def context_cross_project_threads(topic: str) -> str:
+    """
+    Find open threads across ALL projects that relate to a topic.
+    Use when a blocker in one project might be answered by another project's
+    memory, or to surface connected work across the portfolio.
+
+    Returns threads grouped by project, with the source project labelled.
+
+    Args:
+        topic: keyword or phrase to search for in open threads
+    """
+    if not topic or not topic.strip():
+        return json.dumps({"error": "topic cannot be empty"})
+
+    q = topic.strip().lower()
+    registry = _load_registry()
+    matches: list[dict] = []
+
+    for proj in registry.get("projects", []):
+        name = proj["name"]
+        mem = _load_project_memory(name)
+        if not mem:
+            continue
+        for t in mem.get("open_threads", []):
+            question = t.get("question", "")
+            if q in question.lower():
+                matches.append({
+                    "project": name,
+                    "question": question,
+                    "recorded_at": t.get("recorded_at", t.get("sessions", ["?"])[0]
+                                        if isinstance(t.get("sessions"), list) else "?"),
+                    "source": t.get("source", "session-end"),
+                })
+
+    if not matches:
+        return json.dumps({"topic": topic, "found": 0, "threads": []})
+
+    # Group by project for readability
+    grouped: dict = {}
+    for m in matches:
+        grouped.setdefault(m["project"], []).append(m["question"])
+
+    return json.dumps({
+        "topic": topic,
+        "found": len(matches),
+        "by_project": grouped,
+        "all": matches,
+    }, indent=2)
 
 
 @mcp.tool()

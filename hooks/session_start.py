@@ -88,6 +88,42 @@ def deduplicate_threads(threads: list[dict]) -> list[dict]:
     return deduped
 
 
+def find_cross_project_threads(current_project: str, limit: int = 4) -> list[dict]:
+    """
+    Scan all OTHER projects for open threads that mention the current project
+    by name or keyword. Returns compact hit list: [{project, question}].
+    """
+    with open(REGISTRY_PATH) as f:
+        registry = json.load(f)
+
+    # Build search terms for the current project
+    current = next(
+        (p for p in registry["projects"] if p["name"] == current_project), {}
+    )
+    search_terms = {current_project.lower()}
+    for kw in current.get("keywords", []):
+        search_terms.add(kw.lower())
+
+    hits = []
+    for proj in registry["projects"]:
+        if proj["name"] == current_project:
+            continue
+        mem_path = PROJECTS_DIR / proj["name"] / "memory" / "project_memory.json"
+        if not mem_path.exists():
+            continue
+        try:
+            mem = json.loads(mem_path.read_text())
+        except Exception:
+            continue
+        for t in mem.get("open_threads", []):
+            q = t.get("question", "").lower()
+            if any(term in q for term in search_terms):
+                hits.append({"project": proj["name"], "question": t.get("question", "")})
+                if len(hits) >= limit:
+                    return hits
+    return hits
+
+
 def summarize_project(project: str) -> str:
     mem_path = PROJECTS_DIR / project / "memory" / "project_memory.json"
     if not mem_path.exists():
@@ -158,6 +194,13 @@ def summarize_project(project: str) -> str:
             sid = s.get("session_id", "?")
             summary = s.get("summary", "")[:120]
             lines.append(f"- [{sid}] {summary}")
+
+    # Cross-project threads (v3-C) — threads in OTHER projects that mention this one
+    cross = find_cross_project_threads(project)
+    if cross:
+        lines.append(f"\nRelated threads from other projects:")
+        for h in cross:
+            lines.append(f"- [{h['project']}] {h['question'][:100]}")
 
     if len(lines) == 1:
         return ""
