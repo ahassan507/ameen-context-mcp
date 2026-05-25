@@ -34,7 +34,10 @@ def classify(cwd: str) -> tuple[str | None, int]:
         registry = json.load(f)
     cwd_l = cwd.lower()
     scores = []
+    default_project = None
     for proj in registry["projects"]:
+        if proj.get("default"):
+            default_project = proj["name"]
         score = 0
         for path in proj.get("paths", []):
             if path.lower() in cwd_l:
@@ -46,6 +49,9 @@ def classify(cwd: str) -> tuple[str | None, int]:
     scores.sort(key=lambda x: x[1], reverse=True)
     if scores and scores[0][1] > 0:
         return scores[0]
+    # No cwd match — fall back to the designated default project
+    if default_project:
+        return default_project, 0
     return None, 0
 
 

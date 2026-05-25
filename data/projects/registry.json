@@ -2,9 +2,10 @@
   "projects": [
     {
       "name": "agentos",
-      "keywords": ["agentos", "agent os", "memory vault", "session memory", "mcp", "ameen-context", "hooks", "claude code setup"],
+      "default": true,
+      "keywords": ["agentos", "agent os", "memory vault", "vault", "session memory", "mcp", "ameen-context", "hooks", "claude code setup", "vault setup"],
       "description": "Building the personal Agentic OS — MCP servers, hooks, agents, session memory infrastructure.",
-      "paths": ["ameen-context-mcp", "Workshop_1_Files", "claude code"]
+      "paths": ["ameen-context-mcp", "claude code"]
     },
     {
       "name": "rooted-wellness",
