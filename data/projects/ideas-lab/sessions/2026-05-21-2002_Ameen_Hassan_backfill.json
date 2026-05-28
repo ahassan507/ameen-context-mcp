@@ -1,0 +1,51 @@
+{
+  "session_id": "2026-05-21-2002",
+  "timestamp": "2026-05-21T20:02:00Z",
+  "author": "Ameen Hassan",
+  "project": "ideas-lab",
+  "summary": "Session centered on debugging a GitHub Actions workflow_dispatch error for the 360Chicago run and clearing up app package / OAuth registration confusion. The GitHub Actions API was repeatedly returning errors when listing workflow runs, making it impossible to check run status through the Teams agent interface. Investigation revealed that the repo was under the personal EMU account (Ameen-Hassan_ideas), not ideasorg, which placed it outside the enterprise runner provisioning scope. Additionally, clarified that the app had two registered OAuth apps and worked out which one to use. Session ended while debugging whether the app package needed to be repackaged to pick up the latest OAuth app reference.",
+  "problems": [
+    "GitHub Actions API returning error for listWorkflowRuns: 'encountered an error when processing' — no run data retrievable through the Teams agent",
+    "GitHub-hosted runners not provisioned for repos under personal EMU account — only org-level repos get runner minutes",
+    "Two OAuth apps registered — unclear which one should be used in the app package",
+    "App package may be stale and need repackaging to pick up the correct OAuth app ID"
+  ],
+  "approaches": [
+    "Attempted to list workflow runs through GitHub Actions plugin — API errors persisted across retries",
+    "Provided raw repository API response to help diagnose run ID",
+    "Provided PAT and base64-encoded token values for authentication troubleshooting",
+    "Reviewed enterprise runner provisioning: standard runners had no status badge in the org, indicating runner minutes not provisioned",
+    "Investigated whether app needed to be repackaged vs just having secrets updated"
+  ],
+  "results": [
+    "Confirmed repo under personal EMU account is outside the enterprise runner provisioning scope",
+    "Standard GitHub-hosted runners showing no status badge in enterprise org — confirmed runner provisioning not set up",
+    "Two OAuth apps identified — need to reconcile which is active",
+    "Session ended while assessing repackaging need"
+  ],
+  "decisions": [
+    {
+      "decision": "Repo must be under ideasorg to access GitHub-hosted runners provisioned at org level",
+      "status": "confirmed"
+    }
+  ],
+  "open_questions": [
+    "Which of the two registered OAuth apps is the correct one to use?",
+    "Does the app package need to be rebuilt and re-uploaded to pick up the new OAuth app ID?",
+    "How do we migrate the repo from personal EMU account to ideasorg?"
+  ],
+  "tags": [
+    "discovery-gap-sentinel",
+    "ideas-lab",
+    "github-actions",
+    "runner-provisioning",
+    "oauth",
+    "app-package",
+    "emu",
+    "ideasorg",
+    "360chicago"
+  ],
+  "source_cwd": "c:/Users/amhass/OneDrive - SAS/Documents/GitHub/ideaslab-discovery-clean",
+  "source_session_id": "backfill-0a6b7609",
+  "structured_at": "2026-05-28T23:45:00Z"
+}

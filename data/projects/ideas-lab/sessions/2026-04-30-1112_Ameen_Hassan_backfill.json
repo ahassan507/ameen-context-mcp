@@ -1,0 +1,53 @@
+{
+  "session_id": "2026-04-30-1112",
+  "timestamp": "2026-04-30T11:12:00Z",
+  "author": "Ameen Hassan",
+  "project": "ideas-lab",
+  "summary": "Wide-ranging session covering repo housekeeping, M365 agent instructions drafting, and deep coverage math analysis. Started by committing and pushing pending changes, then worked on improving Copilot agent instructions to 8000-character limit and updating them to handle both personal project assistance and team questions. Explored repo organization suggestions. Later shifted to a detailed audit of pipeline logic issues flagged by a Copilot review, specifically around the coverage percentage denominator, pre-scored sections leaking into scoring, and whether an integration fixture for the AI step was truly missing. Session hit rate limits toward the end while investigating where `render_from_results.py` pulls its denominator from `scoring.py`.",
+  "problems": [
+    "M365 declarative agent instructions were insufficient — needed expansion to 8000-character limit covering both personal use and team Q&A",
+    "Repo organization was messy; .md files could not be attached to agents directly (needed Word conversions)",
+    "Coverage math may be inflated: pre-scored sections could leak into denominator (Defect 3)",
+    "test count in PROJECT_BRIEFING.md was stale (claimed 210, actual run showed 233)",
+    "No single pytest integration fixture covering the full Phase1→verify_grounding→Phase2 seam"
+  ],
+  "approaches": [
+    "Committed and pushed all pending changes to clean up working tree",
+    "Drafted expanded M365 agent instructions combining project assistant and team Q&A roles",
+    "Created Word versions of key .md files for attachment to agents",
+    "Reviewed PROJECT_BRIEFING.md claims against actual test run output",
+    "Investigated whether Defect 3 (pre-scored sections denominator inflation) was already documented as a known gap",
+    "Identified entry point for denominator computation: render_from_results.py imports from scripts/scoring.py"
+  ],
+  "results": [
+    "Agent instructions expanded and updated for both personal and team use",
+    "Confirmed Defect 3 is already listed as a known gap in PROJECT_BRIEFING",
+    "Confirmed stale test count (210 vs 233) as immediate fix target",
+    "Denominator logic traced to scripts/scoring.py via render_from_results.py"
+  ],
+  "decisions": [
+    {
+      "decision": "A dedicated Agent B Project Assistant folder should be created to hold all files the agent needs, updated each time the project updates",
+      "status": "confirmed"
+    },
+    {
+      "decision": "Integration fixture covering Phase1→LLM→Phase2 seam is needed as a pytest test using a static known-good analysis.json",
+      "status": "proposed"
+    }
+  ],
+  "open_questions": [
+    "What is the exact filter logic in scoring.py that excludes pre-scored sections from the denominator?",
+    "Is the stale test count in PROJECT_BRIEFING.md the only documentation drift?"
+  ],
+  "tags": [
+    "discovery-gap-sentinel",
+    "ideas-lab",
+    "coverage-math",
+    "m365-agent",
+    "repo-organization",
+    "testing"
+  ],
+  "source_cwd": "c:/Users/amhass/OneDrive - SAS/Documents/GitHub/ideaslab-discovery-clean",
+  "source_session_id": "backfill-07fe",
+  "structured_at": "2026-05-28T23:45:00Z"
+}

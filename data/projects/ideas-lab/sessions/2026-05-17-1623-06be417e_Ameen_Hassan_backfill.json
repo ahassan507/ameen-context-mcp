@@ -1,0 +1,52 @@
+{
+  "session_id": "2026-05-17-1623-06be417e",
+  "timestamp": "2026-05-17T16:23:00Z",
+  "author": "Ameen Hassan",
+  "project": "ideas-lab",
+  "summary": "Session addressing Bedrock model non-determinism in gap report extraction, specifically the QA_FAIL errors where sections were failing with 'Reasoning without evidence' for fields like website and champion_contact. The fix involved adding a question bank to the section prompt and a self-review step inside the LLM call so the model could validate its own extraction before returning. Changes were made to scripts/run_agent_b_bedrock.py (later renamed), a branch fix/llm-self-review was created, a PR was opened against ideasorg/ideaslab-discovery-agent (PR #46), merged, and a GitHub Actions run was triggered for 360Chicago session 1 with run_id '360chicago-s01-selfrev-20260517'. Session hit a rate limit after the run was triggered.",
+  "problems": [
+    "Bedrock step E producing QA_FAIL errors: 'Reasoning without evidence for website' and 'Reasoning without evidence for champion_contact'",
+    "Model was returning reasoning without citing evidence spans, causing downstream validation to reject the output",
+    "Regex-based extraction was insufficient — needed LLM to derive context from long transcripts rather than pattern-match"
+  ],
+  "approaches": [
+    "Added question bank (counted_question_guidance texts) to the section prompt so the model sees the exact questions to answer",
+    "Added a self-review block inside the LLM call so the model validates its own extraction before returning",
+    "Updated _build_section_prompt and _process_section with transcript_self_review_max_chars parameter",
+    "Created branch fix/llm-self-review, pushed to ideasorg, opened PR #46",
+    "Merged PR and triggered workflow run '360chicago-s01-selfrev-20260517'"
+  ],
+  "results": [
+    "Changes committed and pushed to ideasorg/ideaslab-discovery-agent via PR #46",
+    "PR merged successfully",
+    "GitHub Actions run triggered: https://github.com/ideasorg/ideaslab-discovery-agent/actions/runs/26002878624",
+    "Run estimated to take ~10 minutes"
+  ],
+  "decisions": [
+    {
+      "decision": "Extraction should be LLM-driven with self-review, not regex — the model must derive context from long transcripts",
+      "status": "confirmed"
+    },
+    {
+      "decision": "Question texts from counted_question_guidance should be injected into the section prompt",
+      "status": "confirmed"
+    }
+  ],
+  "open_questions": [
+    "What did the 360chicago-s01-selfrev-20260517 run produce — did QA_FAIL errors disappear?",
+    "Are the merges going to ideasorg correctly or is there still a fork/branch confusion?"
+  ],
+  "tags": [
+    "discovery-gap-sentinel",
+    "ideas-lab",
+    "bedrock",
+    "non-determinism",
+    "self-review",
+    "question-bank",
+    "pr-46",
+    "360chicago"
+  ],
+  "source_cwd": "c:/Users/amhass/OneDrive - SAS/Documents/GitHub/ideaslab-discovery-clean",
+  "source_session_id": "backfill-06be417e",
+  "structured_at": "2026-05-28T23:45:00Z"
+}

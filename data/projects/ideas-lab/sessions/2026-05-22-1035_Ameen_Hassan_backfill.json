@@ -1,0 +1,50 @@
+{
+  "session_id": "2026-05-22-1035",
+  "timestamp": "2026-05-22T10:35:00Z",
+  "author": "Ameen Hassan",
+  "project": "ideas-lab",
+  "summary": "Session focused on fixing Teams app validation errors in the Discovery Gap Sentinel sideload package. Applied three targeted fixes to the appPackage: (1) added a missing uploadInputFile operation to sharepointActions.yaml, (2) aligned the auth type in githubActions.json to ApiKeyPluginVault with bearer scheme, and (3) cleaned up adaptive card responses. Iterated through multiple versions of the sideload zip (v1.0.2 through v1.0.9) testing each upload. Discovered that ApiKeyPluginVault consistently returned 400 on sideload, while OAuthPluginVault had previously worked (v0.2.7). Also began inspecting the ideasorg/ideaslab-discovery-agent remote main repo to plan cleanup and ensure no contradicting files exist.",
+  "problems": [
+    "Teams sideload upload returning 400 Bad Request across multiple package versions with ApiKeyPluginVault",
+    "sharepointActions.yaml missing uploadInputFile operation",
+    "YAML security scheme mismatched with plugin JSON auth type after previous experiments",
+    "Every ApiKeyPluginVault variant (name, UUID, http/bearer, OAuth2 YAML) returned 400 — only OAuthPluginVault variants didn't (v1.0.2 got 500)",
+    "ideasorg remote main repo may have contradicting or messy files needing cleanup"
+  ],
+  "approaches": [
+    "Applied three targeted fixes to appPackage files following explicit fix instructions",
+    "Rebuilt sideload zip after each fix and tested upload",
+    "Diagnosed that YAML still had http/bearer scheme from ApiKeyPluginVault experiments even after reverting JSON to OAuthPluginVault",
+    "Reverted YAML to OAuth2 scheme to match OAuthPluginVault JSON in v1.0.9",
+    "Inspected ideasorg/ideaslab-discovery-agent remote main repo and reported back with cleanup plan"
+  ],
+  "results": [
+    "Multiple sideload versions built (v1.0.2 through v1.0.9)",
+    "ApiKeyPluginVault confirmed to not work for sideloaded apps — only admin-deployed apps support it",
+    "v1.0.9 prepared: OAuthPluginVault + GITHUB_OAUTH_REF + OAuth2 YAML — same as v0.2.7 which previously uploaded",
+    "ideasorg remote repo inspected and cleanup plan drafted"
+  ],
+  "decisions": [
+    {
+      "decision": "ApiKeyPluginVault does not work for sideloaded apps — must use OAuthPluginVault for sideload",
+      "status": "confirmed"
+    }
+  ],
+  "open_questions": [
+    "Does v1.0.9 with OAuthPluginVault + OAuth2 YAML successfully upload without 400?",
+    "What specific cleanup is needed in the ideasorg remote repo?"
+  ],
+  "tags": [
+    "discovery-gap-sentinel",
+    "ideas-lab",
+    "teams-app",
+    "sideload",
+    "apppackage",
+    "oauth",
+    "api-key-plugin-vault",
+    "validation"
+  ],
+  "source_cwd": "c:/Users/amhass/OneDrive - SAS/Documents/GitHub/ideaslab-discovery-clean",
+  "source_session_id": "backfill-6b1b90d4",
+  "structured_at": "2026-05-28T23:45:00Z"
+}

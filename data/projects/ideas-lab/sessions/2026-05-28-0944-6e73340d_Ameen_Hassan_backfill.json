@@ -1,0 +1,57 @@
+{
+  "session_id": "2026-05-28-0944-6e73340d",
+  "timestamp": "2026-05-28T09:44:00Z",
+  "author": "Ameen Hassan",
+  "project": "ideas-lab",
+  "summary": "Session dedicated to fixing the Discovery Gap Sentinel Teams app package after persistent 'bad request' (400) errors on upload. Applied fixes to spec.url paths in both githubActions.json and sharepointActions.json (actions/ prefix issues), then encountered a zip archive resolution error where Teams could not find the YAML files. Ran a logic-inspector audit after continued 400 errors. Worked through creating new OAuth registrations (new Graph reference and GitHub PAT) and deleting the previous ones. Iterated through repackaging with corrected PAT vault reference IDs. Also reviewed whether to delete and re-upload the app (which would create a new app ID) vs updating in place.",
+  "problems": [
+    "Teams sideload upload returning 400 Bad Request after spec.url path changes",
+    "Zip archive resolution error: Teams could not find githubActions.yaml and sharepointActions.yaml",
+    "spec.url was set relative to plugin JSON location rather than package root — Teams resolves relative to package root",
+    "A prior change had incorrectly removed the 'actions/' prefix from spec.url, then needed reverting",
+    "Previous OAuth app registrations needed to be replaced with fresh ones"
+  ],
+  "approaches": [
+    "Applied fix to set spec.url with 'actions/' prefix in both plugin JSON files",
+    "Ran logic-inspector to do complete inspection after continued 400 errors",
+    "Created new GitHub PAT and new Graph OAuth reference, deleted previous ones",
+    "Updated githubActions.json with the new vault reference ID",
+    "Rebuilt and repackaged the sideload zip after each fix",
+    "Considered deleting and re-uploading app vs updating in place (re-upload creates new app ID)"
+  ],
+  "results": [
+    "Zip archive resolution error traced to spec.url path prefix handling",
+    "Logic inspector audit completed",
+    "New OAuth registrations created with fresh IDs",
+    "App package rebuilt with updated vault reference",
+    "Session continued iterating on 400 errors"
+  ],
+  "decisions": [
+    {
+      "decision": "spec.url must include the 'actions/' prefix since Teams resolves relative to package root, not the plugin JSON location",
+      "status": "confirmed"
+    },
+    {
+      "decision": "Create new OAuth registrations (both Graph and GitHub PAT) and delete old ones for a clean slate",
+      "status": "confirmed"
+    }
+  ],
+  "open_questions": [
+    "Does updating the app in place vs deleting and re-uploading affect the app ID used by existing installations?",
+    "Which specific validation rule is causing the persistent 400 after all fixes are applied?"
+  ],
+  "tags": [
+    "discovery-gap-sentinel",
+    "ideas-lab",
+    "teams-app",
+    "sideload",
+    "apppackage",
+    "spec-url",
+    "oauth",
+    "logic-inspector",
+    "400-error"
+  ],
+  "source_cwd": "c:/Users/amhass/OneDrive - SAS/Documents/GitHub/ideaslab-discovery-clean",
+  "source_session_id": "backfill-6e73340d",
+  "structured_at": "2026-05-28T23:45:00Z"
+}

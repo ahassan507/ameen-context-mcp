@@ -1,0 +1,54 @@
+{
+  "session_id": "2026-05-17-1455",
+  "timestamp": "2026-05-17T14:55:00Z",
+  "author": "Ameen Hassan",
+  "project": "ideas-lab",
+  "summary": "Major session focused on restoring the discovery sentinel pipeline to a pre-Bedrock stable state after instability was detected. Context included reviewing IDeaS org GitHub documentation and Entra ID screenshots. Key issue: the pipeline had no stable baseline because Bedrock step E was producing inconsistent results. Session involved reorganizing the repo so that both the Bedrock approach and a no-Bedrock fallback could coexist, removing any references to Claude/Anthropic from the codebase, and working out how to merge cleanly into the ideasorg enterprise repo (which requires a branch-first workflow due to Datadog review). Session ran a 360Chicago session 1 test and observed 23% coverage — lower than expected — prompting investigation of pipeline stability before proceeding with further runs.",
+  "problems": [
+    "Pipeline unstable after Bedrock experiments — no clean baseline",
+    "No references to Claude or Anthropic should appear in the repo (org policy)",
+    "ideasorg enterprise repo requires merging via branches due to Datadog review process",
+    "360Chicago session 1 returned only 23% coverage — unexpected and concerning",
+    "Repo had conflicting files that could confuse both Bedrock and non-Bedrock approaches"
+  ],
+  "approaches": [
+    "Reviewed IDeaS GitHub org documentation to understand merge and workflow constraints",
+    "Reviewed Entra ID configuration screenshots for OAuth context",
+    "Reorganized repo so both Bedrock and no-Bedrock approaches could coexist without conflicts",
+    "Removed all Claude/Anthropic references from codebase",
+    "Created a branch, reviewed it against ideasorg/main, and planned the merge",
+    "Ran 360Chicago session 1 through the pipeline to test stability"
+  ],
+  "results": [
+    "Pipeline restored toward stable pre-Bedrock baseline",
+    "Claude/Anthropic references removed",
+    "Understood ideasorg branch-first merge requirement",
+    "360Chicago session 1 completed with 23% coverage — diagnosed as potential pipeline instability issue"
+  ],
+  "decisions": [
+    {
+      "decision": "Must fix underlying pipeline instability before running any future sessions — no point running if output is unreliable",
+      "status": "confirmed"
+    },
+    {
+      "decision": "Repo must support both Bedrock and non-Bedrock approaches without contradicting files",
+      "status": "confirmed"
+    }
+  ],
+  "open_questions": [
+    "Why did 360Chicago session 1 return only 23% coverage — is this a genuine gap or a pipeline bug?",
+    "Are the merges happening in ideasorg or the personal fork?"
+  ],
+  "tags": [
+    "discovery-gap-sentinel",
+    "ideas-lab",
+    "bedrock",
+    "pipeline-stability",
+    "ideasorg",
+    "360chicago",
+    "coverage"
+  ],
+  "source_cwd": "c:/Users/amhass/OneDrive - SAS/Documents/GitHub/ideaslab-discovery-clean",
+  "source_session_id": "backfill-4b97a9",
+  "structured_at": "2026-05-28T23:45:00Z"
+}
