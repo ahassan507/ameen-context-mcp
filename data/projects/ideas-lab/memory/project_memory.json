@@ -1,8 +1,18 @@
 {
   "project": "ideas-lab",
-  "last_updated": "2026-05-28T21:30:00Z",
-  "canonical_summary": "The ideas-lab project tracks Ameen's work as a Business Analytics Intern at IDeaS Revenue Solutions (IDeaS.Lab). A core deliverable is the Discovery Gap Sentinel — a Teams declarative agent that triggers an analysis pipeline via GitHub Actions and reads report outputs from SharePoint. On May 28 the Teams app was fully provisioned via M365 Agents Toolkit 6.10.0: app ID f6d6a2eb-5b09-43c5-b491-766603695e76, 57/57 validations passing, GitHub OAuth connection updated to the new app ID. A second May 28 session completed a full audit and bug-fix pass on the Python pipeline (Gate 5): fixed governance.py sentence counter false-fires on abbreviations, parameterized the 16-section hardcoding, fixed evidence.py retry loop, rewrote check_run_scope.py to use a snapshot/baseline pair, cleaned stale comments in 4 files, and removed ~985 lines of dead render_html v1 code plus the Gate 4 LLM wrapper functions. Test suite: 359 passing. Pipeline health: 9/10. Key structural rule: plugin JSONs must live at appPackage root while YAML specs stay in actions/ (toolkit path resolution). An automated workspace sync task has also been failing since April 2026 due to a missing IDeaS_Workspace directory — this remains an open blocker separate from the pipeline work.",
+  "last_updated": "2026-05-28T23:30:00Z",
+  "canonical_summary": "The ideas-lab project tracks Ameen's work as a Business Analytics Intern at IDeaS Revenue Solutions (IDeaS.Lab). A core deliverable is the Discovery Gap Sentinel — a Teams declarative agent that triggers an analysis pipeline via GitHub Actions and reads report outputs from SharePoint. The sideload package is at v1.0.29 (manifest bumped to fix YAML scope mismatch). The Teams GitHub OAuth integration is BLOCKED: the OAuthPluginVault registration is correctly configured (reference_id matches, app ID d670c019 correct, scope: repo, endpoints correct) but the Teams sign-in card has never appeared — root cause is either M365 tenant policy blocking external OAuth or registration propagation delay (created 5/22/26). No GitHub Actions run has ever been created by the Teams agent; all prior runs were manually triggered. A pivot to ApiKeyPluginVault with a new GitHub PAT is under consideration. Correct 360Chicago session 5 file paths confirmed: data/transcripts/360chicago/. Earlier May 28 sessions: provisioned via M365 Agents Toolkit 6.10.0 (57/57 validations), completed full Python pipeline audit (governance.py abbreviation fix, evidence.py retry fix, check_run_scope.py snapshot/baseline, dead code removal). Test suite: 359 passing. Pipeline health: 9/10.",
   "known_solutions": [
+    {
+      "problem": "Teams OAuthPluginVault sign-in card never appears — agent gets 'encountered an error when processing' on all GitHub API calls",
+      "solution": "Root cause unresolved. OAuthPluginVault registration is correctly configured. Two candidate causes: (1) M365 tenant policy blocking external OAuth sign-in flows in Copilot plugins — needs M365 admin check; (2) registration propagation delay (new registrations can take up to 60 min). Workaround path: switch to ApiKeyPluginVault with a GitHub classic PAT (repo scope) — bypasses sign-in card entirely.",
+      "evidence_sessions": ["2026-05-28-2330"]
+    },
+    {
+      "problem": "Teams agent dispatch inputs used bare filenames instead of repo-relative paths, causing workflow prepare_analysis step to fail with 'file not found'",
+      "solution": "360Chicago brief path: data/transcripts/360chicago/360Chicago_Client_Brief_Strict_Post_Research_Desk_Only_v0x 1.docx; transcript path: data/transcripts/360chicago/session_05_2026-01-15_segmentation-channels.docx. General rule: always use full repo-relative paths from repo root.",
+      "evidence_sessions": ["2026-05-28-2330"]
+    },
     {
       "problem": "governance.py sentence counter fires on abbreviation periods (Dr., Mr., Ms., etc.) causing false 'too many sentences' errors on valid narratives",
       "solution": "Add _ABBREVS pattern and _count_sentences() helper that replaces abbreviation periods with null-byte placeholder before splitting on sentence boundaries. Lookbehind regex does NOT work because abbreviations end in lowercase.",
@@ -66,6 +76,16 @@
   ],
   "decision_log": [
     {
+      "decision": "Remove 'workflow' scope from githubActions.yaml — repo scope is sufficient for workflow_dispatch, listing runs, and downloading artifacts from private repos",
+      "status": "confirmed",
+      "evidence_sessions": ["2026-05-28-2330"]
+    },
+    {
+      "decision": "OAuthPluginVault approach may need to be abandoned in favor of ApiKeyPluginVault with a static GitHub PAT — Teams OAuth sign-in card consistently fails to appear; pending final call",
+      "status": "under consideration",
+      "evidence_sessions": ["2026-05-28-2330"]
+    },
+    {
       "decision": "Sentence counter false-fires fixed via abbreviation pre-processing (_count_sentences helper), not lookbehind regex — lookbehind fails on lowercase-ending abbreviations like Ms., Dr.",
       "status": "confirmed",
       "evidence_sessions": ["2026-05-28-2130"]
@@ -123,12 +143,24 @@
   ],
   "open_threads": [
     {
+      "question": "Should Teams GitHub auth switch from OAuthPluginVault to ApiKeyPluginVault with a GitHub PAT? If so, create a classic PAT with repo scope and register in Teams Dev Portal as API key.",
+      "sessions": ["2026-05-28-2330"]
+    },
+    {
+      "question": "Is M365 tenant policy blocking external OAuth sign-in flows for Copilot plugins? Needs M365 admin check.",
+      "sessions": ["2026-05-28-2330"]
+    },
+    {
+      "question": "Should dispatch go through GitHub API directly or through the existing Lambda/API Gateway endpoint (API_GATEWAY_KEY)?",
+      "sessions": ["2026-05-28-2330"]
+    },
+    {
       "question": "Does the Agent_B_Specs.docx word document reflect the current Gate 5 pipeline? (user opened it but review was not completed)",
       "sessions": ["2026-05-28-2130"]
     },
     {
       "question": "Has end-to-end workflow dispatch been tested from the Teams agent through to pipeline completion?",
-      "sessions": ["2026-05-28-2000"]
+      "sessions": ["2026-05-28-2000", "2026-05-28-2330"]
     },
     {
       "question": "Are the changes on branch fix/apppackage-v0.2.0-sync committed and pushed?",
@@ -180,15 +212,19 @@
     "test-coverage": ["2026-05-28-2130"],
     "gate-5": ["2026-05-28-2130"],
     "refactor": ["2026-05-28-2130"],
-    "teams-plugin": ["2026-05-28-2000"],
+    "teams-plugin": ["2026-05-28-2000", "2026-05-28-2330"],
     "m365-agents-toolkit": ["2026-05-28-2000"],
-    "declarative-agent": ["2026-05-28-2000"],
+    "declarative-agent": ["2026-05-28-2000", "2026-05-28-2330"],
     "provisioning": ["2026-05-28-2000"],
-    "oauth": ["2026-05-28-2000"],
-    "github-actions": ["2026-05-28-2000"],
+    "oauth": ["2026-05-28-2000", "2026-05-28-2330"],
+    "oauthpluginvault": ["2026-05-28-2330"],
+    "apikeypluginvault": ["2026-05-28-2330"],
+    "github-actions": ["2026-05-28-2000", "2026-05-28-2330"],
     "sharepoint": ["2026-05-28-2000"],
     "adaptive-card": ["2026-05-28-2000"],
-    "discovery-gap-sentinel": ["2026-05-28-2000", "2026-05-28-2130"],
+    "sideload": ["2026-05-28-2330"],
+    "360chicago": ["2026-05-28-2330"],
+    "discovery-gap-sentinel": ["2026-05-28-2000", "2026-05-28-2130", "2026-05-28-2330"],
     "ideas-lab": ["2026-04-26-2045-b1626b0d", "2026-05-15-1606-36558f51", "2026-05-19-1747-c8f48609", "2026-05-25-193000", "2026-05-28-2130"],
     "python": ["2026-05-28-2130"],
     "scheduled-task": ["2026-05-04-1500-13046a70", "2026-04-26-2045-b1626b0d", "2026-05-15-1606-36558f51", "2026-05-19-1747-c8f48609"],

@@ -1,0 +1,70 @@
+{
+  "session_id": "2026-05-28-2330",
+  "timestamp": "2026-05-28T23:30:00Z",
+  "author": "Ameen Hassan",
+  "project": "ideas-lab",
+  "summary": "Continued Teams declarative agent OAuth integration for Discovery Gap Sentinel. Diagnosed why the GitHub OAuth sign-in card never appeared in Teams. Confirmed the OAuthPluginVault registration is correctly configured (reference_id matches, app ID correct, endpoints correct, scope: repo). Removed the unnecessary 'workflow' scope from githubActions.yaml (only 'repo' needed for workflow dispatch and run listing). Bumped manifest to v1.0.29 and rebuilt the sideload zip. Identified the correct repo-relative file paths for 360Chicago session 5 dispatch (data/transcripts/360chicago/). Confirmed that run #91 in GitHub Actions was manually triggered — no run has ever been created by the Teams agent. The Teams OAuth sign-in card has never appeared, pointing to either an M365 tenant policy blocking external OAuth or a propagation delay on the new registration. Explored switching from OAuthPluginVault to ApiKeyPluginVault with a GitHub PAT as a simpler alternative. GitHub repo environments have prod/stage/dev environments; dev has AWS credentials only — no usable GitHub PAT exists in current secrets.",
+  "problems": [
+    "Teams agent listWorkflowRuns returns 'encountered an error when processing' — OAuth sign-in card never appears",
+    "createWorkflowDispatch attempts do not create any GitHub Actions runs",
+    "Agent misreported dispatch failures — was claiming 'GitHub returned an error before a run was created' when no API call was reaching GitHub at all",
+    "Agent used bare filenames (no directory path) for brief_path and transcript_path on first dispatch attempt — correct paths are under data/transcripts/360chicago/",
+    "YAML security scheme included 'workflow' scope which is not registered in Teams Dev Portal (scope: repo only) — potential scope mismatch"
+  ],
+  "approaches": [
+    "Removed 'workflow' scope from githubActions.yaml security section and scheme definition — repo scope covers all needed GitHub API operations",
+    "Bumped manifest.json version to 1.0.29 (Teams requires version strictly higher than installed)",
+    "Built v1.0.29 sideload zip using build_sideload.ps1 — user confirmed successful upload",
+    "Verified Teams Dev Portal registration: reference_id in githubActions.json matches URL path in Dev Portal, Teams app ID d670c019-9fee-4230-b77c-a222e0880adc confirmed, all endpoints correct",
+    "Found correct repo-relative paths for 360Chicago session 5: brief at data/transcripts/360chicago/360Chicago_Client_Brief_Strict_Post_Research_Desk_Only_v0x 1.docx, transcript at data/transcripts/360chicago/session_05_2026-01-15_segmentation-channels.docx",
+    "Confirmed run #91 was manually triggered from GitHub UI — Teams OAuth path has never succeeded",
+    "Explored ApiKeyPluginVault approach: create GitHub PAT with repo scope, register in Teams Dev Portal as API key, swap OAuthPluginVault in plugin JSON — bypasses sign-in card entirely",
+    "Confirmed Lambda/API Gateway trigger (API_GATEWAY_KEY) works as an alternative dispatch path"
+  ],
+  "results": [
+    "v1.0.29 built and uploaded successfully — YAML scope fixed, manifest bumped",
+    "Teams OAuth sign-in card still never appeared after v1.0.29 install",
+    "Correct 360Chicago session 5 file paths identified from local repo data/ directory structure",
+    "OAuthPluginVault registration confirmed correct — not a misconfiguration issue",
+    "Root cause narrowed to: M365 tenant policy blocking external OAuth sign-in, OR propagation delay on new registration (created 5/22/26 9:10 PM)",
+    "No usable GitHub PAT exists in current org/repo secrets — new PAT would need to be created for ApiKeyPluginVault approach",
+    "Decision pending: create GitHub PAT (ApiKeyPluginVault) vs pivot to Lambda endpoint for dispatch"
+  ],
+  "decisions": [
+    {
+      "decision": "Remove 'workflow' scope from githubActions.yaml — repo scope is sufficient for workflow_dispatch, listing runs, and downloading artifacts",
+      "status": "confirmed"
+    },
+    {
+      "decision": "OAuthPluginVault approach may need to be abandoned in favor of ApiKeyPluginVault with a static GitHub PAT — Teams OAuth sign-in card consistently fails to appear",
+      "status": "under consideration"
+    },
+    {
+      "decision": "Use data/transcripts/360chicago/ as the base path for 360Chicago brief and transcript files in dispatch inputs",
+      "status": "confirmed"
+    }
+  ],
+  "open_questions": [
+    "Is M365 tenant policy blocking external OAuth sign-in flows for Copilot plugins? Would need M365 admin to verify.",
+    "Should we switch from OAuthPluginVault to ApiKeyPluginVault with a GitHub PAT to bypass the sign-in card problem?",
+    "Should dispatch go through GitHub API directly (ApiKeyPluginVault) or through the existing Lambda/API Gateway endpoint (API_GATEWAY_KEY)?",
+    "If using ApiKeyPluginVault: create a new GitHub classic PAT with repo scope, or use an existing service account?",
+    "Does the Teams OAuth registration propagation delay explain the missing sign-in card (registration created 5/22/26 9:10 PM)?",
+    "Has the end-to-end workflow dispatch from Teams ever completed successfully?"
+  ],
+  "tags": [
+    "discovery-gap-sentinel",
+    "teams-plugin",
+    "oauth",
+    "github-actions",
+    "declarative-agent",
+    "oauthpluginvault",
+    "apikeypluginvault",
+    "ideas-lab",
+    "sideload",
+    "360chicago"
+  ],
+  "source_cwd": "c:/Users/amhass/OneDrive - SAS/Documents/GitHub/ideaslab-discovery-clean",
+  "source_session_id": "manual-2026-05-28-2330",
+  "structured_at": "2026-05-28T23:30:00Z"
+}
