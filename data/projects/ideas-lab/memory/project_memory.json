@@ -1,8 +1,23 @@
 {
   "project": "ideas-lab",
-  "last_updated": "2026-05-28T20:00:00Z",
-  "canonical_summary": "The ideas-lab project tracks Ameen's work as a Business Analytics Intern at IDeaS Revenue Solutions (IDeaS.Lab). A core deliverable is the Discovery Gap Sentinel \u2014 a Teams declarative agent that triggers an analysis pipeline via GitHub Actions and reads report outputs from SharePoint. On May 28 the Teams app was fully provisioned via M365 Agents Toolkit 6.10.0: app ID f6d6a2eb-5b09-43c5-b491-766603695e76, 57/57 validations passing, GitHub OAuth connection updated to the new app ID. Key structural fix: plugin JSONs (sharepointActions.json, githubActions.json) must live at appPackage root while YAML specs stay in actions/, because the toolkit's zip builder and validator use different path resolution bases. The agent can trigger the workflow via GitHub OAuth (repo scope only, sufficient for workflow_dispatch), read SharePoint reports, and now renders an adaptive card on file upload. An automated workspace sync task has also been failing since April 2026 due to a missing IDeaS_Workspace directory path \u2014 this remains an open blocker separate from the Teams work.",
+  "last_updated": "2026-05-28T21:30:00Z",
+  "canonical_summary": "The ideas-lab project tracks Ameen's work as a Business Analytics Intern at IDeaS Revenue Solutions (IDeaS.Lab). A core deliverable is the Discovery Gap Sentinel — a Teams declarative agent that triggers an analysis pipeline via GitHub Actions and reads report outputs from SharePoint. On May 28 the Teams app was fully provisioned via M365 Agents Toolkit 6.10.0: app ID f6d6a2eb-5b09-43c5-b491-766603695e76, 57/57 validations passing, GitHub OAuth connection updated to the new app ID. A second May 28 session completed a full audit and bug-fix pass on the Python pipeline (Gate 5): fixed governance.py sentence counter false-fires on abbreviations, parameterized the 16-section hardcoding, fixed evidence.py retry loop, rewrote check_run_scope.py to use a snapshot/baseline pair, cleaned stale comments in 4 files, and removed ~985 lines of dead render_html v1 code plus the Gate 4 LLM wrapper functions. Test suite: 359 passing. Pipeline health: 9/10. Key structural rule: plugin JSONs must live at appPackage root while YAML specs stay in actions/ (toolkit path resolution). An automated workspace sync task has also been failing since April 2026 due to a missing IDeaS_Workspace directory — this remains an open blocker separate from the pipeline work.",
   "known_solutions": [
+    {
+      "problem": "governance.py sentence counter fires on abbreviation periods (Dr., Mr., Ms., etc.) causing false 'too many sentences' errors on valid narratives",
+      "solution": "Add _ABBREVS pattern and _count_sentences() helper that replaces abbreviation periods with null-byte placeholder before splitting on sentence boundaries. Lookbehind regex does NOT work because abbreviations end in lowercase.",
+      "evidence_sessions": ["2026-05-28-2130"]
+    },
+    {
+      "problem": "check_run_scope.py flags pre-existing uncommitted changes as session violations when working tree is dirty",
+      "solution": "Use --snapshot FILE before session starts to record pre-existing dirty paths; use --baseline FILE at session end to compare only new changes. Legacy no-arg mode preserved.",
+      "evidence_sessions": ["2026-05-28-2130"]
+    },
+    {
+      "problem": "evidence.py retry fallback prompt never included item_verdicts, so retry always fails with same 'item_verdicts missing keys' error",
+      "solution": "Conditionally add item_verdicts schema description to the strict retry prompt when required_items is non-empty, listing exact required keys.",
+      "evidence_sessions": ["2026-05-28-2130"]
+    },
     {
       "problem": "m365agents.yml rejected by M365 Agents Toolkit with InvalidYamlSchemaError",
       "solution": "File must use version: v1.11 lifecycle schema format (provision/deploy/publish stages), not custom fields. Toolkit 6.10.0 requires exactly 'v1.11'.",
@@ -26,40 +41,50 @@
     {
       "problem": "Need to determine which week folder each IDeaS_Lab file belongs to based on modification date",
       "solution": "IDeaS_Workspace contains Week-01_Feb-03 through at least Week-08_Mar-24 folders",
-      "evidence_sessions": [
-        "2026-04-26-2045-b1626b0d"
-      ]
+      "evidence_sessions": ["2026-04-26-2045-b1626b0d"]
     },
     {
-      "problem": "Conversation transcript is truncated \u2014 only the scheduled task invocation header and an empty synthetic response are visible",
+      "problem": "Conversation transcript is truncated — only the scheduled task invocation header and an empty synthetic response are visible",
       "solution": "No results determinable from the truncated transcript",
-      "evidence_sessions": [
-        "2026-05-15-1606-36558f51"
-      ]
+      "evidence_sessions": ["2026-05-15-1606-36558f51"]
     },
     {
       "problem": "IDeaS_Workspace directory not found at ~/Desktop/IDeaS_Workspace/",
       "solution": "IDeaS_Workspace not present at expected Desktop path",
-      "evidence_sessions": [
-        "2026-05-19-1747-c8f48609"
-      ]
+      "evidence_sessions": ["2026-05-19-1747-c8f48609"]
     },
     {
       "problem": "360chi health check report files had been pushed to a GitHub repo and the user did not want them traceable",
       "solution": "Report files confirmed still present on disk after git rm --cached",
-      "evidence_sessions": [
-        "2026-05-25-190813"
-      ]
+      "evidence_sessions": ["2026-05-25-190813"]
     },
     {
       "problem": "The data-qualification-agent repo had been pushed to GitHub with history that the user did not want exposed",
       "solution": "Report files (360chi_health_check_report.docx/html/json/md) confirmed still on disk after git rm --cached",
-      "evidence_sessions": [
-        "2026-05-25-193000"
-      ]
+      "evidence_sessions": ["2026-05-25-193000"]
     }
   ],
   "decision_log": [
+    {
+      "decision": "Sentence counter false-fires fixed via abbreviation pre-processing (_count_sentences helper), not lookbehind regex — lookbehind fails on lowercase-ending abbreviations like Ms., Dr.",
+      "status": "confirmed",
+      "evidence_sessions": ["2026-05-28-2130"]
+    },
+    {
+      "decision": "validate_report expected_sections defaults to 16 for backward compat; render_from_results.py passes len(registry) to make it data-driven",
+      "status": "confirmed",
+      "evidence_sessions": ["2026-05-28-2130"]
+    },
+    {
+      "decision": "evidence.py stubbed as 7-line namespace stub (not deleted) to avoid breaking smoke import test",
+      "status": "confirmed",
+      "evidence_sessions": ["2026-05-28-2130"]
+    },
+    {
+      "decision": "render_html v1 (~985 lines) fully removed from report_builder.py — not kept as named fallback",
+      "status": "confirmed",
+      "evidence_sessions": ["2026-05-28-2130"]
+    },
     {
       "decision": "Plugin JSONs live at appPackage root; YAML specs stay in actions/ — this is the required structure for M365 Agents Toolkit",
       "status": "confirmed",
@@ -78,219 +103,112 @@
     {
       "decision": "Replace existing repo with a clean single-commit repo with no prior history",
       "status": "confirmed",
-      "evidence_sessions": [
-        "2026-05-25-190813"
-      ]
+      "evidence_sessions": ["2026-05-25-190813"]
     },
     {
       "decision": "Keep the repo private going forward",
       "status": "established",
-      "evidence_sessions": [
-        "2026-05-25-190813"
-      ]
+      "evidence_sessions": ["2026-05-25-190813"]
     },
     {
       "decision": "Replace existing repo with a fresh repo that has no prior git history",
       "status": "confirmed",
-      "evidence_sessions": [
-        "2026-05-25-193000"
-      ]
+      "evidence_sessions": ["2026-05-25-193000"]
     },
     {
       "decision": "Keep the repo private going forward",
       "status": "established",
-      "evidence_sessions": [
-        "2026-05-25-193000"
-      ]
+      "evidence_sessions": ["2026-05-25-193000"]
     }
   ],
   "open_threads": [
+    {
+      "question": "Does the Agent_B_Specs.docx word document reflect the current Gate 5 pipeline? (user opened it but review was not completed)",
+      "sessions": ["2026-05-28-2130"]
+    },
     {
       "question": "Has end-to-end workflow dispatch been tested from the Teams agent through to pipeline completion?",
       "sessions": ["2026-05-28-2000"]
     },
     {
       "question": "Are the changes on branch fix/apppackage-v0.2.0-sync committed and pushed?",
-      "sessions": ["2026-05-28-2000"]
+      "sessions": ["2026-05-28-2000", "2026-05-28-2130"]
     },
     {
       "question": "Did the 'ideas-workspace-weekly-sync' scheduled task execute its intended logic, or did it fail silently?",
-      "sessions": [
-        "2026-05-04-1500-13046a70"
-      ]
+      "sessions": ["2026-05-04-1500-13046a70"]
     },
     {
       "question": "Why does the assistant response show zero input and output tokens?",
-      "sessions": [
-        "2026-05-04-1500-13046a70"
-      ]
+      "sessions": ["2026-05-04-1500-13046a70"]
     },
     {
       "question": "Were the IDeaS_Lab and Downloads files successfully moved into their correct weekly folders?",
-      "sessions": [
-        "2026-04-26-2045-b1626b0d"
-      ]
+      "sessions": ["2026-04-26-2045-b1626b0d"]
     },
     {
       "question": "Was Week-12_Apr-21 (or the current week folder) created?",
-      "sessions": [
-        "2026-04-26-2045-b1626b0d"
-      ]
+      "sessions": ["2026-04-26-2045-b1626b0d"]
     },
     {
       "question": "Did the scheduled task complete its full sync run or exit partway through?",
-      "sessions": [
-        "2026-04-26-2045-b1626b0d"
-      ]
+      "sessions": ["2026-04-26-2045-b1626b0d"]
     },
     {
       "question": "What is the full content of the ideas-workspace-weekly-sync scheduled task SKILL.md?",
-      "sessions": [
-        "2026-05-15-1606-36558f51"
-      ]
-    },
-    {
-      "question": "Did the scheduled task execute successfully or fail?",
-      "sessions": [
-        "2026-05-15-1606-36558f51"
-      ]
-    },
-    {
-      "question": "What was the intended output or sync action for the IDeaS workspace weekly sync?",
-      "sessions": [
-        "2026-05-15-1606-36558f51"
-      ]
+      "sessions": ["2026-05-15-1606-36558f51"]
     },
     {
       "question": "Where is the IDeaS_Workspace directory located if not on the Desktop?",
-      "sessions": [
-        "2026-05-19-1747-c8f48609"
-      ]
-    },
-    {
-      "question": "Was the IDeaS_Workspace ever created or has it been moved/renamed?",
-      "sessions": [
-        "2026-05-19-1747-c8f48609"
-      ]
-    },
-    {
-      "question": "Should the scheduled task path be updated to reflect the correct workspace location?",
-      "sessions": [
-        "2026-05-19-1747-c8f48609"
-      ]
+      "sessions": ["2026-05-19-1747-c8f48609"]
     },
     {
       "question": "Were sensitive files like .claude/settings.local.json and any xlsx files properly excluded from the fresh commit?",
-      "sessions": [
-        "2026-05-25-190813"
-      ]
-    },
-    {
-      "question": "Was the new GitHub repo created under the same name (data-qualification-agent) or a different one?",
-      "sessions": [
-        "2026-05-25-190813"
-      ]
-    },
-    {
-      "question": "Was the fresh commit pushed to GitHub successfully?",
-      "sessions": [
-        "2026-05-25-190813"
-      ]
+      "sessions": ["2026-05-25-190813"]
     },
     {
       "question": "Was the fresh repo successfully pushed to GitHub after the history strip?",
-      "sessions": [
-        "2026-05-25-193000"
-      ]
-    },
-    {
-      "question": "Was .claude/settings.local.json properly excluded before the clean commit was made?",
-      "sessions": [
-        "2026-05-25-193000"
-      ]
-    },
-    {
-      "question": "Are there other sensitive files in the staged set that should be excluded?",
-      "sessions": [
-        "2026-05-25-193000"
-      ]
+      "sessions": ["2026-05-25-193000"]
     }
   ],
   "contributors": [],
   "tag_index": {
-    "scheduled-task": [
-      "2026-05-04-1500-13046a70",
-      "2026-04-26-2045-b1626b0d",
-      "2026-05-15-1606-36558f51",
-      "2026-05-19-1747-c8f48609"
-    ],
-    "ideas-workspace": [
-      "2026-05-04-1500-13046a70"
-    ],
-    "automated-run": [
-      "2026-05-04-1500-13046a70",
-      "2026-04-26-2045-b1626b0d",
-      "2026-05-15-1606-36558f51"
-    ],
-    "no-output": [
-      "2026-05-04-1500-13046a70"
-    ],
-    "ideas-lab": [
-      "2026-04-26-2045-b1626b0d",
-      "2026-05-15-1606-36558f51",
-      "2026-05-19-1747-c8f48609",
-      "2026-05-25-193000"
-    ],
-    "workspace-sync": [
-      "2026-04-26-2045-b1626b0d",
-      "2026-05-19-1747-c8f48609"
-    ],
-    "file-organization": [
-      "2026-04-26-2045-b1626b0d"
-    ],
-    "weekly-sync": [
-      "2026-05-15-1606-36558f51"
-    ],
-    "truncated-transcript": [
-      "2026-05-15-1606-36558f51"
-    ],
-    "sprint-tracking": [
-      "2026-05-19-1747-c8f48609"
-    ],
-    "missing-directory": [
-      "2026-05-19-1747-c8f48609"
-    ],
-    "permission-error": [
-      "2026-05-19-1747-c8f48609"
-    ],
-    "github": [
-      "2026-05-25-190813",
-      "2026-05-25-193000"
-    ],
-    "git-history": [
-      "2026-05-25-190813",
-      "2026-05-25-193000"
-    ],
-    "data-qualification-agent": [
-      "2026-05-25-190813",
-      "2026-05-25-193000"
-    ],
-    "sensitive-files": [
-      "2026-05-25-190813",
-      "2026-05-25-193000"
-    ],
-    "repo-cleanup": [
-      "2026-05-25-190813",
-      "2026-05-25-193000"
-    ],
-    "ideas-internship": [
-      "2026-05-25-190813"
-    ],
-    "360chi": [
-      "2026-05-25-190813"
-    ],
-    "privacy": [
-      "2026-05-25-193000"
-    ]
+    "pipeline-audit": ["2026-05-28-2130"],
+    "bug-fix": ["2026-05-28-2130"],
+    "governance": ["2026-05-28-2130"],
+    "dead-code-removal": ["2026-05-28-2130"],
+    "test-coverage": ["2026-05-28-2130"],
+    "gate-5": ["2026-05-28-2130"],
+    "refactor": ["2026-05-28-2130"],
+    "teams-plugin": ["2026-05-28-2000"],
+    "m365-agents-toolkit": ["2026-05-28-2000"],
+    "declarative-agent": ["2026-05-28-2000"],
+    "provisioning": ["2026-05-28-2000"],
+    "oauth": ["2026-05-28-2000"],
+    "github-actions": ["2026-05-28-2000"],
+    "sharepoint": ["2026-05-28-2000"],
+    "adaptive-card": ["2026-05-28-2000"],
+    "discovery-gap-sentinel": ["2026-05-28-2000", "2026-05-28-2130"],
+    "ideas-lab": ["2026-04-26-2045-b1626b0d", "2026-05-15-1606-36558f51", "2026-05-19-1747-c8f48609", "2026-05-25-193000", "2026-05-28-2130"],
+    "python": ["2026-05-28-2130"],
+    "scheduled-task": ["2026-05-04-1500-13046a70", "2026-04-26-2045-b1626b0d", "2026-05-15-1606-36558f51", "2026-05-19-1747-c8f48609"],
+    "ideas-workspace": ["2026-05-04-1500-13046a70"],
+    "automated-run": ["2026-05-04-1500-13046a70", "2026-04-26-2045-b1626b0d", "2026-05-15-1606-36558f51"],
+    "no-output": ["2026-05-04-1500-13046a70"],
+    "workspace-sync": ["2026-04-26-2045-b1626b0d", "2026-05-19-1747-c8f48609"],
+    "file-organization": ["2026-04-26-2045-b1626b0d"],
+    "weekly-sync": ["2026-05-15-1606-36558f51"],
+    "truncated-transcript": ["2026-05-15-1606-36558f51"],
+    "sprint-tracking": ["2026-05-19-1747-c8f48609"],
+    "missing-directory": ["2026-05-19-1747-c8f48609"],
+    "permission-error": ["2026-05-19-1747-c8f48609"],
+    "github": ["2026-05-25-190813", "2026-05-25-193000"],
+    "git-history": ["2026-05-25-190813", "2026-05-25-193000"],
+    "data-qualification-agent": ["2026-05-25-190813", "2026-05-25-193000"],
+    "sensitive-files": ["2026-05-25-190813", "2026-05-25-193000"],
+    "repo-cleanup": ["2026-05-25-190813", "2026-05-25-193000"],
+    "ideas-internship": ["2026-05-25-190813"],
+    "360chi": ["2026-05-25-190813"],
+    "privacy": ["2026-05-25-193000"]
   }
 }
