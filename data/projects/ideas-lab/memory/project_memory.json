@@ -1,8 +1,28 @@
 {
   "project": "ideas-lab",
-  "last_updated": "2026-05-25T19:31:09Z",
-  "canonical_summary": "The ideas-lab project tracks Ameen's work as a Business Analytics Intern at IDeaS Revenue Solutions (IDeaS.Lab), organized in a sprint-based workspace with weekly folders spanning Week-01 (Feb 3) through at least Week-08 (Mar 24), originally located at ~/Desktop/IDeaS_Workspace/. An automated scheduled task called 'ideas-workspace-weekly-sync' was configured to scan and summarize weekly workspace activity, but has failed on every run since April 26, 2026 \u2014 the May 4 run produced a synthetic placeholder, the May 15 transcript was severely truncated, and the May 19 run could not locate the IDeaS_Workspace directory at all, indicating the workspace has moved or been removed from its expected Desktop location. A separate effort on May 25 cleaned up a GitHub repository called data-qualification-agent (under ahassan507) that had accumulated 360 health check report files in its commit history; the decision was made to replace it with a clean single-commit repo with no prior history and keep it private. The root cause of the sync failures \u2014 a broken directory path unresolved for over four weeks \u2014 remains the primary open blocker, and the immediate next steps are to manually locate the current IDeaS_Workspace directory, update the sync task's path configuration, and run a validation scan before the next scheduled execution.",
+  "last_updated": "2026-05-28T20:00:00Z",
+  "canonical_summary": "The ideas-lab project tracks Ameen's work as a Business Analytics Intern at IDeaS Revenue Solutions (IDeaS.Lab). A core deliverable is the Discovery Gap Sentinel \u2014 a Teams declarative agent that triggers an analysis pipeline via GitHub Actions and reads report outputs from SharePoint. On May 28 the Teams app was fully provisioned via M365 Agents Toolkit 6.10.0: app ID f6d6a2eb-5b09-43c5-b491-766603695e76, 57/57 validations passing, GitHub OAuth connection updated to the new app ID. Key structural fix: plugin JSONs (sharepointActions.json, githubActions.json) must live at appPackage root while YAML specs stay in actions/, because the toolkit's zip builder and validator use different path resolution bases. The agent can trigger the workflow via GitHub OAuth (repo scope only, sufficient for workflow_dispatch), read SharePoint reports, and now renders an adaptive card on file upload. An automated workspace sync task has also been failing since April 2026 due to a missing IDeaS_Workspace directory path \u2014 this remains an open blocker separate from the Teams work.",
   "known_solutions": [
+    {
+      "problem": "m365agents.yml rejected by M365 Agents Toolkit with InvalidYamlSchemaError",
+      "solution": "File must use version: v1.11 lifecycle schema format (provision/deploy/publish stages), not custom fields. Toolkit 6.10.0 requires exactly 'v1.11'.",
+      "evidence_sessions": ["2026-05-28-2000"]
+    },
+    {
+      "problem": "teamsApp/zipAppPackage fails with doubled path 'actions/actions/xxx.yaml not found'",
+      "solution": "Plugin JSON spec URLs were relative to the plugin file's directory. Since plugin JSONs were in actions/, 'actions/xxx.yaml' doubled. Fix: move plugin JSONs to appPackage root and use 'actions/xxx.yaml' as spec URL.",
+      "evidence_sessions": ["2026-05-28-2000"]
+    },
+    {
+      "problem": "teamsApp/validateAppPackage fails with 'File not found in zip archive' even though YAML is in the zip",
+      "solution": "Toolkit zip builder resolves spec URLs relative to plugin JSON directory on disk; validator resolves relative to zip root. Only consistent when plugin JSONs are at appPackage root. Keep plugin JSONs at root, YAML specs in actions/.",
+      "evidence_sessions": ["2026-05-28-2000"]
+    },
+    {
+      "problem": "Teams Dev Portal OAuth connection rejects requests after provisioning new app",
+      "solution": "Update the 'Restrict usage by app' field in the OAuth connection to the new provisioned app ID (f6d6a2eb). The old sideload app ID (d670c019) no longer applies.",
+      "evidence_sessions": ["2026-05-28-2000"]
+    },
     {
       "problem": "Need to determine which week folder each IDeaS_Lab file belongs to based on modification date",
       "solution": "IDeaS_Workspace contains Week-01_Feb-03 through at least Week-08_Mar-24 folders",
@@ -41,6 +61,21 @@
   ],
   "decision_log": [
     {
+      "decision": "Plugin JSONs live at appPackage root; YAML specs stay in actions/ — this is the required structure for M365 Agents Toolkit",
+      "status": "confirmed",
+      "evidence_sessions": ["2026-05-28-2000"]
+    },
+    {
+      "decision": "m365agents.yml must use version: v1.11 and include deploy: [] even for declarative agents with nothing to deploy",
+      "status": "confirmed",
+      "evidence_sessions": ["2026-05-28-2000"]
+    },
+    {
+      "decision": "GitHub OAuth repo scope is sufficient for workflow_dispatch — workflow scope is for editing workflow YAML files, not running them",
+      "status": "confirmed",
+      "evidence_sessions": ["2026-05-28-2000"]
+    },
+    {
       "decision": "Replace existing repo with a clean single-commit repo with no prior history",
       "status": "confirmed",
       "evidence_sessions": [
@@ -70,6 +105,14 @@
     }
   ],
   "open_threads": [
+    {
+      "question": "Has end-to-end workflow dispatch been tested from the Teams agent through to pipeline completion?",
+      "sessions": ["2026-05-28-2000"]
+    },
+    {
+      "question": "Are the changes on branch fix/apppackage-v0.2.0-sync committed and pushed?",
+      "sessions": ["2026-05-28-2000"]
+    },
     {
       "question": "Did the 'ideas-workspace-weekly-sync' scheduled task execute its intended logic, or did it fail silently?",
       "sessions": [

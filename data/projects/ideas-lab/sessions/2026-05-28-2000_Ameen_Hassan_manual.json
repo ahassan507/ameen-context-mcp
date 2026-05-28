@@ -1,0 +1,74 @@
+{
+  "session_id": "2026-05-28-2000",
+  "timestamp": "2026-05-28T20:00:00Z",
+  "author": "Ameen Hassan",
+  "project": "ideas-lab",
+  "summary": "Full M365 Agents Toolkit provisioning of the Discovery Gap Sentinel declarative agent, resolving a chain of four cascading errors. Starting from a broken m365agents.yml (wrong schema), working through a doubled path bug in plugin JSON spec URLs, a toolkit path resolution inconsistency between the zip builder and validator, and a missing deploy lifecycle stage. All four were resolved; the app (f6d6a2eb-5b09-43c5-b491-766603695e76) provisioned with 57/57 validations passing. Additionally: fixed githubActions.yaml to restore context_notes optional input and correct path descriptions to repo-relative only; confirmed repo OAuth scope is sufficient for workflow_dispatch; added an adaptive card to the uploadInputFile function showing filename and a View in SharePoint button; updated the Teams Dev Portal OAuth connection to reference the new provisioned app ID.",
+  "problems": [
+    "m365agents.yml had wrong schema format (custom fields like name/projectType/auth) instead of the lifecycle YAML format the toolkit requires",
+    "Plugin JSON spec URLs used 'actions/xxx.yaml' relative to files already inside actions/ folder, causing doubled path 'actions/actions/xxx.yaml' during zip build",
+    "After fixing spec URLs to 'xxx.yaml', zip built but validator could not find the YAML files — toolkit zip builder and validator use different path resolution bases",
+    "m365agents.yml had no deploy lifecycle stage, causing error when Deploy button was clicked",
+    "githubActions.yaml had removed context_notes from createWorkflowDispatch inputs, but instructions.txt still told the agent to gather it",
+    "githubActions.yaml described brief_path/transcript_path as supporting SharePoint paths, but the workflow only accepts repo-relative paths",
+    "workflow scope was removed from GitHub OAuth spec, unnecessarily (repo scope is sufficient for workflow_dispatch)"
+  ],
+  "approaches": [
+    "Replaced m365agents.yml content with correct v1.11 lifecycle schema (version: v1.11, environmentFolderPath, provision/publish stages)",
+    "Changed plugin JSON spec URLs from 'actions/xxx.yaml' to 'xxx.yaml' (relative to plugin JSON file location in actions/)",
+    "Moved plugin JSONs (sharepointActions.json, githubActions.json) to appPackage root so zip builder and validator both resolve 'actions/xxx.yaml' correctly",
+    "Updated declarativeAgent.json to reference root-level plugin files without path prefix",
+    "Added deploy: [] to m365agents.yml",
+    "Restored context_notes as optional input in githubActions.yaml createWorkflowDispatch",
+    "Reverted path descriptions to repo-relative only",
+    "Confirmed repo scope is sufficient; reverted workflow scope addition",
+    "Added response_semantics adaptive card to uploadInputFile in both sharepointActions.json copies"
+  ],
+  "results": [
+    "App f6d6a2eb-5b09-43c5-b491-766603695e76 provisioned via M365 Agents Toolkit 6.10.0",
+    "57/57 validations pass on teamsApp/validateAppPackage",
+    "deploy lifecycle executes with 0 steps cleanly",
+    "User updated Teams Dev Portal OAuth connection (GitHub Discovery Gap Sentinel) to allow new app ID f6d6a2eb",
+    "uploadInputFile now renders an adaptive card with filename and View in SharePoint button",
+    "context_notes optional input restored to workflow dispatch spec",
+    "Brief/transcript paths correctly described as repo-relative only"
+  ],
+  "decisions": [
+    {
+      "decision": "Plugin JSONs live at appPackage root, not in actions/ subdirectory — YAML specs stay in actions/",
+      "status": "confirmed"
+    },
+    {
+      "decision": "m365agents.yml must use version: v1.11 (not 1.0.0)",
+      "status": "confirmed"
+    },
+    {
+      "decision": "repo OAuth scope is sufficient for GitHub workflow_dispatch — workflow scope not needed",
+      "status": "confirmed"
+    },
+    {
+      "decision": "Provision via M365 Agents Toolkit, not manual sideload zip, for the registered app going forward",
+      "status": "confirmed"
+    }
+  ],
+  "open_questions": [
+    "Has end-to-end workflow dispatch been tested from the agent (Teams → GitHub → pipeline)?",
+    "Does the SharePoint uploadInputFile OAuth work correctly with the new app ID f6d6a2eb?",
+    "Are the changes on branch fix/apppackage-v0.2.0-sync committed and pushed?"
+  ],
+  "tags": [
+    "teams-plugin",
+    "m365-agents-toolkit",
+    "declarative-agent",
+    "provisioning",
+    "oauth",
+    "github-actions",
+    "sharepoint",
+    "adaptive-card",
+    "ideas-lab",
+    "discovery-gap-sentinel"
+  ],
+  "source_cwd": "c:/Users/amhass/OneDrive - SAS/Documents/GitHub/ideaslab-discovery-clean",
+  "source_session_id": "manual-2026-05-28",
+  "structured_at": "2026-05-28T20:00:00Z"
+}
