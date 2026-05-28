@@ -1,0 +1,98 @@
+{
+  "session_id": "2026-05-28-0000",
+  "timestamp": "2026-05-28T00:00:00Z",
+  "author": "Ameen Hassan",
+  "project": "ideas-lab",
+  "summary": "Full DQ Agent (ideaslab-dq-agent) session. Fixed Lambda timeout on large datasets (removed 100K row cap, raised safety ceiling to 2M rows). Bumped Lambda memory from 1024MB to 3072MB via Terraform. Fixed two main branch issues: boto3 was in dev-only deps (not bundled in Lambda zip) and handler.py had a wrong _REPO_ROOT sys.path hack that resolved to /var/ instead of /var/task/. Fixed new-client crash: run_health_check.py crashed with FileNotFoundError when no config/clients/{slug}/field_map.json existed — added existence check with empty-dict fallback so pipeline runs for any client. Fixed CI: poetry.lock was out of sync after pyproject.toml changes, causing poetry export to fail; added poetry lock step in GitHub Actions workflow (two iterations: --no-update flag not supported in Poetry 2.x, then removed flag). All changes merged to ideasorg/main via PRs #29, #30, #31. Teams Copilot appPackage cleaned: deleted stale repairDeclarativeAgent.json, confirmed all files correct (manifest, dqDeclarativeAgent.json, ai-plugin.json, adaptive cards). Successfully ran full pipeline on 1,025,307 rows in 4m10s (2431MB RAM used, within 3072MB limit). Flow 2 ran successfully and saved outputs to SharePoint. Investigated Teams agent sharing: atk share fails with 403 for advanced declarative agents (Microsoft platform limitation — not tenant policy). Attempted fresh provision to bypass stuck title ID. Shared via sideload zip (appPackage.dev.zip) as workaround.",
+  "problems": [
+    "Lambda timed out processing large datasets — 100K row hard cap was masking the real file size",
+    "boto3 was in dev-only Poetry group — not bundled in Lambda zip, causing ImportError in production",
+    "handler.py had _REPO_ROOT = Path(__file__).parent.parent which resolved to /var/ in Lambda (not /var/task/)",
+    "New clients without config/clients/{slug}/field_map.json crashed pipeline at Step 1 with FileNotFoundError",
+    "CI failed: poetry.lock out of sync after moving boto3 from dev to runtime deps in pyproject.toml",
+    "poetry lock --no-update not supported in Poetry 2.x — CI failed again on second attempt",
+    "atk share consistently fails 403 'Title not allowed to be modify' for advanced declarative agent",
+    "Fresh provision reused same title ID instead of creating new one — had to clear TEAMS_APP_ID and M365_TITLE_ID from env/.env.dev",
+    "After fresh provision, atk share still fails 403 — confirmed Microsoft platform limitation for advanced declarative agents"
+  ],
+  "approaches": [
+    "Changed nrows=100_000 to nrows=2_000_000 in run_health_check.py Step 0",
+    "Bumped Lambda memory from 1024 to 3072 in terraform/variables.tf and applied via terraform apply",
+    "Moved boto3 from [tool.poetry.group.dev.dependencies] to [tool.poetry.dependencies] in pyproject.toml",
+    "Removed 3-line _REPO_ROOT sys.path block from src/handler.py — Lambda puts /var/task on sys.path automatically",
+    "Added field_map_path.exists() check in run_health_check.py — falls back to FIELD_MAP={}, OPT_FIELD_MAP={} with warning log",
+    "Added poetry lock step in CI before poetry export — first attempt used --no-update flag (Poetry 2.x incompatible)",
+    "Removed --no-update flag from poetry lock in CI — Poetry 2.x does not upgrade by default",
+    "Cleared TEAMS_APP_ID and M365_TITLE_ID from env/.env.dev to force fresh provision",
+    "Confirmed Microsoft docs: advanced declarative agents (with API plugins) cannot use atk share — scope must stay personal",
+    "Distributed appPackage.dev.zip (11KB, built 5/27 12:50) directly to teammates for manual sideload install"
+  ],
+  "results": [
+    "Full 1,025,307 row pipeline completed in 4m10s — 2431MB RAM, well within 15-min timeout and 3072MB limit",
+    "Lambda deployed successfully via GitHub Actions after poetry lock fix (PRs #29, #30, #31 merged to main)",
+    "New clients no longer crash — field_map fallback works, report runs with 'No match' for all IDeaS standard fields",
+    "Flow 2 confirmed successful: files saved to discovery_runs/data_health_reports/360chicago/outputs/2026-05-27T16-33-22Z/",
+    "appPackage cleaned: repairDeclarativeAgent.json deleted from both appPackage/ root and build artifacts",
+    "atk share permanently blocked for advanced declarative agents — platform limitation, not a config issue",
+    "Workaround: sideload zip sharing works; teammates install via Teams > Apps > Upload a custom app"
+  ],
+  "decisions": [
+    {
+      "decision": "Remove 100K row cap; use 2M safety ceiling — full datasets must be processed",
+      "status": "confirmed"
+    },
+    {
+      "decision": "Lambda memory stays at 3072MB — 2431MB was used on 1M row run, no headroom to reduce",
+      "status": "confirmed"
+    },
+    {
+      "decision": "boto3 is a runtime dependency, not dev-only — must be in [tool.poetry.dependencies]",
+      "status": "confirmed"
+    },
+    {
+      "decision": "field_map.json is optional — new clients fall back to empty dicts, pipeline completes without crashing",
+      "status": "confirmed"
+    },
+    {
+      "decision": "Use poetry lock (no flags) in CI for Poetry 2.x compatibility",
+      "status": "confirmed"
+    },
+    {
+      "decision": "atk share not viable for this agent — distribute via sideload zip until Microsoft adds platform support",
+      "status": "confirmed"
+    },
+    {
+      "decision": "Teams notification on pipeline complete: post card to a fixed channel via Power Automate Flow 2 SuccessResponse branch",
+      "status": "planned — not yet implemented in Flow 2"
+    }
+  ],
+  "open_questions": [
+    "Teams channel notification via Flow 2 not yet added — 'Post card in a chat or channel' action needs to be wired into SuccessResponse branch",
+    "Should field_map.json auto-generation be added for new clients based on dict.xlsx column names?",
+    "openpyxl is slow for large files (3m48s to load 1M rows) — is there a faster alternative (e.g. calamine engine via python-calamine)?",
+    "Flow 2 Teams notification: which channel should completion cards be posted to?",
+    "Can the DQ Agent eventually be published to the Teams org app catalog instead of sideload distribution?"
+  ],
+  "tags": [
+    "data-qualification-agent",
+    "lambda",
+    "aws",
+    "terraform",
+    "boto3",
+    "poetry",
+    "ci-cd",
+    "github-actions",
+    "teams-plugin",
+    "declarative-agent",
+    "sideload",
+    "field-map",
+    "360chicago",
+    "ideas-lab",
+    "power-automate",
+    "flow2",
+    "sharepoint"
+  ],
+  "source_cwd": "c:/Users/amhass/DQ Agent/data-qualification-agent",
+  "source_session_id": "manual-2026-05-28-0000",
+  "structured_at": "2026-05-28T00:00:00Z"
+}

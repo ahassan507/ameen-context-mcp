@@ -1,8 +1,28 @@
 {
   "project": "ideas-lab",
-  "last_updated": "2026-05-28T23:30:00Z",
-  "canonical_summary": "The ideas-lab project tracks Ameen's work as a Business Analytics Intern at IDeaS Revenue Solutions (IDeaS.Lab). A core deliverable is the Discovery Gap Sentinel — a Teams declarative agent that triggers an analysis pipeline via GitHub Actions and reads report outputs from SharePoint. The sideload package is at v1.0.29 (manifest bumped to fix YAML scope mismatch). The Teams GitHub OAuth integration is BLOCKED: the OAuthPluginVault registration is correctly configured (reference_id matches, app ID d670c019 correct, scope: repo, endpoints correct) but the Teams sign-in card has never appeared — root cause is either M365 tenant policy blocking external OAuth or registration propagation delay (created 5/22/26). No GitHub Actions run has ever been created by the Teams agent; all prior runs were manually triggered. A pivot to ApiKeyPluginVault with a new GitHub PAT is under consideration. Correct 360Chicago session 5 file paths confirmed: data/transcripts/360chicago/. Earlier May 28 sessions: provisioned via M365 Agents Toolkit 6.10.0 (57/57 validations), completed full Python pipeline audit (governance.py abbreviation fix, evidence.py retry fix, check_run_scope.py snapshot/baseline, dead code removal). Test suite: 359 passing. Pipeline health: 9/10.",
+  "last_updated": "2026-05-28T00:00:00Z",
+  "canonical_summary": "The ideas-lab project tracks Ameen's work as a Business Analytics Intern at IDeaS Revenue Solutions (IDeaS.Lab). Two active workstreams: (1) DQ Agent (ideaslab-dq-agent) — AWS Lambda pipeline that runs data health checks on client Excel datasets and posts results to SharePoint via Power Automate Flow 2. Now processes full datasets up to 2M rows (3072MB Lambda memory). All PRs merged to main. Deployed and verified on 1,025,307 row 360Chicago dataset (4m10s, 2431MB RAM). Teams Copilot agent distributed via sideload zip — atk share blocked by Microsoft platform limitation for advanced declarative agents. Teams channel notification via Flow 2 planned but not yet implemented. (2) Discovery Gap Sentinel — Teams declarative agent triggering GitHub Actions analysis pipeline. Teams GitHub OAuth (OAuthPluginVault) is BLOCKED — sign-in card never appears; pivot to ApiKeyPluginVault with a GitHub PAT under consideration. Sideload package at v1.0.29. No GitHub Actions run has ever been created by the Teams agent; all prior runs manually triggered.",
   "known_solutions": [
+    {
+      "problem": "atk share fails 403 'Title not allowed to be modify' for advanced declarative agents — even after fresh provision",
+      "solution": "This is a Microsoft platform limitation: advanced declarative agents (with API plugins/actions) cannot be shared via atk share. scope must stay 'personal'. Workaround: distribute appPackage.dev.zip directly — teammates install via Teams > Apps > Upload a custom app. Microsoft platform support for sharing advanced agents is not yet available.",
+      "evidence_sessions": ["2026-05-28-0000"]
+    },
+    {
+      "problem": "Lambda crashes with FileNotFoundError for new clients — config/clients/{slug}/field_map.json only exists for 360chicago",
+      "solution": "Added field_map_path.exists() check in run_health_check.py Step 1. Falls back to FIELD_MAP={} and OPT_FIELD_MAP={} with a warning log. Pipeline completes; field mapping section shows 'No match' for all IDeaS standard fields until a field_map.json is created for the client.",
+      "evidence_sessions": ["2026-05-28-0000"]
+    },
+    {
+      "problem": "CI fails: poetry.lock out of sync after pyproject.toml changes (boto3 moved from dev to runtime group)",
+      "solution": "Add 'poetry lock' step in GitHub Actions before poetry export. Use bare 'poetry lock' (no --no-update flag) — Poetry 2.x does not support --no-update and does not upgrade packages by default.",
+      "evidence_sessions": ["2026-05-28-0000"]
+    },
+    {
+      "problem": "boto3 ImportError in Lambda production — was in dev-only Poetry group, not bundled in zip",
+      "solution": "Move boto3 from [tool.poetry.group.dev.dependencies] to [tool.poetry.dependencies] in pyproject.toml. poetry export --without dev then includes it.",
+      "evidence_sessions": ["2026-05-28-0000"]
+    },
     {
       "problem": "Teams OAuthPluginVault sign-in card never appears — agent gets 'encountered an error when processing' on all GitHub API calls",
       "solution": "Root cause unresolved. OAuthPluginVault registration is correctly configured. Two candidate causes: (1) M365 tenant policy blocking external OAuth sign-in flows in Copilot plugins — needs M365 admin check; (2) registration propagation delay (new registrations can take up to 60 min). Workaround path: switch to ApiKeyPluginVault with a GitHub classic PAT (repo scope) — bypasses sign-in card entirely.",
@@ -76,6 +96,31 @@
   ],
   "decision_log": [
     {
+      "decision": "atk share not viable for advanced declarative agents — distribute via sideload zip until Microsoft adds platform support",
+      "status": "confirmed",
+      "evidence_sessions": ["2026-05-28-0000"]
+    },
+    {
+      "decision": "field_map.json is optional — new clients fall back to empty dicts, pipeline completes without crashing",
+      "status": "confirmed",
+      "evidence_sessions": ["2026-05-28-0000"]
+    },
+    {
+      "decision": "boto3 is a runtime dependency, not dev-only — must be in [tool.poetry.dependencies]",
+      "status": "confirmed",
+      "evidence_sessions": ["2026-05-28-0000"]
+    },
+    {
+      "decision": "Lambda memory stays at 3072MB — 2431MB was used on 1M row run",
+      "status": "confirmed",
+      "evidence_sessions": ["2026-05-28-0000"]
+    },
+    {
+      "decision": "Remove 100K row cap; use 2M safety ceiling — full datasets must be processed",
+      "status": "confirmed",
+      "evidence_sessions": ["2026-05-28-0000"]
+    },
+    {
       "decision": "Remove 'workflow' scope from githubActions.yaml — repo scope is sufficient for workflow_dispatch, listing runs, and downloading artifacts from private repos",
       "status": "confirmed",
       "evidence_sessions": ["2026-05-28-2330"]
@@ -142,6 +187,18 @@
     }
   ],
   "open_threads": [
+    {
+      "question": "Teams channel notification via Power Automate Flow 2 not yet added — 'Post card in a chat or channel' action needs to be wired into SuccessResponse branch with client_slug, run_id, status, folder_path fields.",
+      "sessions": ["2026-05-28-0000"]
+    },
+    {
+      "question": "Should field_map.json auto-generation be added for new clients based on dict.xlsx column names?",
+      "sessions": ["2026-05-28-0000"]
+    },
+    {
+      "question": "openpyxl loads 1M rows in ~3m48s — is python-calamine a viable faster alternative for Lambda?",
+      "sessions": ["2026-05-28-0000"]
+    },
     {
       "question": "Should Teams GitHub auth switch from OAuthPluginVault to ApiKeyPluginVault with a GitHub PAT? If so, create a classic PAT with repo scope and register in Teams Dev Portal as API key.",
       "sessions": ["2026-05-28-2330"]
